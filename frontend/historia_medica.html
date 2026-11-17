@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial Clínico · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+    <style>
+        :root {
+            --cairo-vanilla: #F3EABF;
+            --cairo-vanilla-soft: #FAF4D3;
+            --cairo-vanilla-light: #FDF6E2;
+            --cairo-vanilla-border: #E8DC9E;
+            --cairo-text: #1A1A1A;
+            --cairo-text-muted: #555555;
+            --cairo-primary: #C98B27;
+        }
+
+        body {
+            background-color: #F8F9FA;
+            color: var(--cairo-text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 1. Cabecera del Perfil del Paciente (Tarjeta General) */
+        .patient-profile-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 22px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Foto del animal en formato estrictamente cuadrado (estilo carné) */
+        .patient-photo-carnet {
+            width: 160px;
+            min-width: 160px;
+            height: 160px;
+            background-color: #FAF8F2;
+            border: 2px solid var(--cairo-vanilla-border);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        .patient-photo-carnet img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .patient-photo-carnet svg {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+        }
+
+        /* Bloques de datos organizados */
+        .patient-data-block {
+            background-color: #FAF8F2;
+            border: 1px solid var(--cairo-vanilla-border);
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+
+        .patient-section-mini-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4A3C10;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(232, 220, 158, 0.6);
+            padding-bottom: 4px;
+        }
+
+        .patient-data-label {
+            font-size: 0.74rem;
+            color: #64748B;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+        }
+
+        .patient-data-value {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--cairo-text);
+            line-height: 1.25;
+        }
+
+        /* 2. Menú de Filtrado de Servicios (Pestañas / Botones) */
+        .cairo-filter-bar {
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 22px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .filter-tabs-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn-filter-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 8px;
+            background-color: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            color: #334155;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .btn-filter-tab:hover {
+            background-color: var(--cairo-vanilla-soft);
+            border-color: var(--cairo-vanilla-border);
+            color: #1A1A1A;
+        }
+
+        .btn-filter-tab.active {
+            background-color: var(--cairo-vanilla);
+            border-color: #DBC87B;
+            color: #1A1A1A;
+            font-weight: 700;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-count-badge {
+            background-color: #FFFFFF;
+            color: #475569;
+            border: 1px solid #CBD5E1;
+            font-size: 0.74rem;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 10px;
+        }
+
+        .btn-filter-tab.active .filter-count-badge {
+            background-color: #1A1A1A;
+            color: #FFFFFF;
+            border-color: #1A1A1A;
+        }
+
+        /* 3. Feed de Registros Clínicos (Tarjetas Cronológicas) */
+        .clinical-records-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .record-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+            transition: box-shadow 0.15s ease;
+        }
+
+        .record-card:hover {
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+        }
+
+        .record-card-header {
+            background-color: var(--cairo-vanilla-soft);
+            border-bottom: 1px solid var(--cairo-vanilla-border);
+            padding: 12px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .record-service-title {
+            font-weight: 700;
+            font-size: 0.96rem;
+            color: #2D2206;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .record-card-body {
+            padding: 20px;
+        }
+
+        /* Chips para Signos Vitales */
+        .vital-chip {
+            background-color: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #475569;
+        }
+
+        .vital-chip strong {
+            color: var(--cairo-text);
+        }
+
+        /* Bloque de Prescripción e Indicaciones */
+        .record-prescription-box {
+            background-color: var(--cairo-vanilla-soft);
+            border: 1px solid var(--cairo-vanilla-border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-top: 16px;
+        }
+
+        .tabla-farmacos-record th {
+            background-color: #F8FAFC;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #334155;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .tabla-farmacos-record td {
+            font-size: 0.86rem;
+            padding: 7px 10px;
+            vertical-align: middle;
+        }
+
+        @media print {
+            body * { visibility: visible !important; }
+            .no-print, #acciones, .sidebar, .topbar, .cairo-filter-bar,
+            .btn-action-header, #lnkEditarPaciente, #fabAyuda { display: none !important; }
+            .shell { display: block !important; min-height: 0 !important; }
+            .contenido-wrap { display: block !important; width: 100% !important; }
+            #contenido { padding: 0 !important; }
+            body { background: #FFFFFF; }
+            .patient-profile-card, .record-card {
+                border: 1px solid #AAA;
+                box-shadow: none;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body data-active="pacientes" data-title="Historial Clínico" data-crumb="Pacientes › Historial">
+
+    <template id="acciones">
+        <a href="pacientes.html" class="btn btn-soft">← Volver a Pacientes</a>
+        <button class="btn btn-soft" id="btnImprimir">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Imprimir Historial
+        </button>
+        <a href="#" id="btnNuevaAtencion" class="btn cairo-btn">+ Nueva Consulta / Atención</a>
+    </template>
+
+    <main id="contenido">
+        <div class="container-fluid px-0 px-md-2" style="max-width: 1180px;">
+
+            <!-- 1. CABECERA DE PERFIL DEL PACIENTE (DATOS GENERALES ORDENADOS) -->
+            <div class="patient-profile-card">
+                <div class="d-flex flex-column flex-md-row gap-4 align-items-start">
+                    
+                    <!-- Fotografía del animal: Estrictamente a la izquierda, en formato cuadrado estilo carné -->
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="patient-photo-carnet" id="boxFotoCarnet">
+                            <span class="text-muted small">Cargando...</span>
+                        </div>
+                        <a href="#" id="lnkEditarPaciente" class="btn btn-sm btn-outline-secondary w-100 mt-2 d-inline-flex align-items-center justify-content-center gap-1" style="font-size: 0.78rem;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            </svg>
+                            Editar Ficha
+                        </a>
+                    </div>
+
+                    <!-- Información detallada al lado de la foto -->
+                    <div class="flex-grow-1 w-100">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <h2 class="h3 fw-bold mb-0 text-dark" id="txtNombrePaciente">—</h2>
+                                <span class="badge bg-light text-dark border fw-bold px-2 py-1" id="txtCodigoPaciente">PAC-0000</span>
+                            </div>
+                            <a href="#" id="btnRegistrarAtencionHeader" class="btn btn-sm btn-outline-dark fw-bold btn-action-header">
+                                + Registrar Atención
+                            </a>
+                        </div>
+
+                        <!-- Bloque: Datos del Paciente -->
+                        <div class="patient-data-block mb-3">
+                            <div class="patient-section-mini-title">Datos del Paciente</div>
+                            <div class="row g-2">
+                                <div class="col-6 col-md-2">
+                                    <div class="patient-data-label">Especie</div>
+                                    <div class="patient-data-value" id="txtEspecie">—</div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="patient-data-label">Raza</div>
+                                    <div class="patient-data-value text-truncate" id="txtRaza">—</div>
+                                </div>
+                                <div class="col-4 col-md-2">
+                                    <div class="patient-data-label">Género</div>
+                                    <div class="patient-data-value" id="txtSexo">—</div>
+                                </div>
+                                <div class="col-4 col-md-2">
+                                    <div class="patient-data-label">Edad</div>
+                                    <div class="patient-data-value" id="txtEdad">—</div>
+                                </div>
+                                <div class="col-4 col-md-2">
+                                    <div class="patient-data-label">Peso actual</div>
+                                    <div class="patient-data-value" id="txtPeso">—</div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="patient-data-label">Alimentación</div>
+                                    <div class="patient-data-value text-truncate" id="txtAlimentacion">—</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bloque: Datos del Propietario Responsable -->
+                        <div class="patient-data-block">
+                            <div class="patient-section-mini-title">Datos del Propietario Responsable</div>
+                            <div class="row g-2">
+                                <div class="col-12 col-md-4">
+                                    <div class="patient-data-label">Propietario</div>
+                                    <div class="patient-data-value" id="txtPropietario">—</div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="patient-data-label">Cédula</div>
+                                    <div class="patient-data-value" id="txtCedula">—</div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="patient-data-label">Teléfono</div>
+                                    <div class="patient-data-value" id="txtTelefono">—</div>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <div class="patient-data-label">Dirección</div>
+                                    <div class="patient-data-value text-truncate" id="txtDireccion">—</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. PANEL DE OPCIONES DEL HISTORIAL CLÍNICO (MENÚ DE FILTRADO DE SERVICIOS) -->
+            <!-- Opciones estrictas: Consultas Generales, Vacunaciones, Desparasitaciones, Castración / Esterilización -->
+            <div class="cairo-filter-bar">
+                <div class="filter-tabs-container" id="contenedorFiltros">
+                    <button type="button" class="btn-filter-tab active" data-filter="all">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        <span>Todas</span>
+                        <span class="filter-count-badge" id="badgeAll">0</span>
+                    </button>
+
+                    <button type="button" class="btn-filter-tab" data-filter="consultas">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"></path>
+                            <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"></path>
+                            <circle cx="20" cy="10" r="2"></circle>
+                        </svg>
+                        <span>Consultas Generales</span>
+                        <span class="filter-count-badge" id="badgeConsultas">0</span>
+                    </button>
+
+                    <button type="button" class="btn-filter-tab" data-filter="vacunaciones">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m18 2 4 4-2 2-4-4 2-2Z"></path>
+                            <path d="m14 6-9.5 9.5a2.12 2.12 0 0 0 0 3L6 20l4.5-4.5"></path>
+                            <path d="m11 9 4 4"></path>
+                            <line x1="2" y1="22" x2="5" y2="19"></line>
+                        </svg>
+                        <span>Vacunaciones</span>
+                        <span class="filter-count-badge" id="badgeVacunas">0</span>
+                    </button>
+
+                    <button type="button" class="btn-filter-tab" data-filter="desparasitaciones">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span>Desparasitaciones</span>
+                        <span class="filter-count-badge" id="badgeDesp">0</span>
+                    </button>
+
+                    <button type="button" class="btn-filter-tab" data-filter="cirugias">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="6" cy="6" r="3"></circle>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                            <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                            <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+                        </svg>
+                        <span>Castración / Esterilización</span>
+                        <span class="filter-count-badge" id="badgeCirugias">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ENCABEZADO DE LA SECCIÓN DE REGISTROS -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h5 fw-bold mb-0 text-dark" id="timelineTitulo">Todas las Atenciones Médicas</h3>
+                <span class="text-muted small fw-semibold" id="timelineConteo">0 registros</span>
+            </div>
+
+            <!-- 3. LÍNEA DE TIEMPO / FEED DE REGISTROS CLÍNICOS -->
+            <div class="clinical-records-feed" id="feedRegistrosClinicos">
+                <div class="skeleton-card" role="status" aria-label="Cargando historial clínico">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="skeleton skeleton-line skeleton-line-sm"></span>
+                        <span class="skeleton skeleton-line" style="width: 22%"></span>
+                    </div>
+                    <div class="d-flex gap-2 mb-3">
+                        <span class="skeleton" style="width: 90px;height: 30px"></span>
+                        <span class="skeleton" style="width: 90px;height: 30px"></span>
+                        <span class="skeleton" style="width: 90px;height: 30px"></span>
+                    </div>
+                    <span class="skeleton skeleton-line skeleton-line-lg mb-2"></span>
+                    <span class="skeleton skeleton-line skeleton-line-sm"></span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Scripts Bootstrap, Cairo y Avatar -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/avatar.js"></script>
+
+    <script>
+        (function () {
+            "use strict";
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const pacienteId = urlParams.get("id");
+
+            if (!pacienteId) {
+                // Si no se especifica paciente, ir directamente al listado general de historias
+                window.location.replace("historias_medicas.html");
+                return;
+            }
+
+            let timelineData = null;
+            let filtroActual = "all";
+
+            // Enlaces de acción en el cuerpo de la página
+            const urlNuevaAtencion = `formulario_paciente.html?id=${encodeURIComponent(pacienteId)}`;
+            const btnRegHdr = document.getElementById("btnRegistrarAtencionHeader");
+            if (btnRegHdr) btnRegHdr.href = urlNuevaAtencion;
+            const lnkEdit = document.getElementById("lnkEditarPaciente");
+            if (lnkEdit) lnkEdit.href = urlNuevaAtencion;
+
+            // Pestañas de filtrado de servicios
+            document.querySelectorAll(".btn-filter-tab").forEach(tab => {
+                tab.addEventListener("click", function () {
+                    document.querySelectorAll(".btn-filter-tab").forEach(t => t.classList.remove("active"));
+                    this.classList.add("active");
+                    filtroActual = this.dataset.filter;
+                    renderizarFeed();
+                });
+            });
+
+            async function cargarHistorial() {
+                try {
+                    timelineData = await Cairo.api(`/pacientes/${encodeURIComponent(pacienteId)}/historia-timeline`);
+                    renderizarCabeceraPaciente(timelineData.paciente);
+                    renderizarContadores(timelineData.contadores);
+                    renderizarFeed();
+                } catch (err) {
+                    Cairo.toast("Error al cargar historial: " + err.message, "error");
+                    document.getElementById("feedRegistrosClinicos").innerHTML = `
+                        <div class="alert alert-danger">No se pudo cargar el historial del paciente: ${Cairo.esc(err.message)}</div>
+                    `;
+                }
+            }
+
+            function renderizarCabeceraPaciente(p) {
+                document.getElementById("txtNombrePaciente").textContent = p.nombre || "Sin nombre";
+                document.getElementById("txtCodigoPaciente").textContent = p.codigo || `PAC-${p.id}`;
+                document.getElementById("txtEspecie").textContent = p.especie || "—";
+                document.getElementById("txtRaza").textContent = p.raza || "Mestizo";
+                document.getElementById("txtSexo").textContent = p.genero || p.sexo || "—";
+                document.getElementById("txtEdad").textContent = p.edad || Cairo.fmt.edad(p.fecha_nac) || "—";
+                document.getElementById("txtPeso").textContent = p.peso ? `${p.peso} kg` : (p.historia?.peso ? `${p.historia.peso} kg` : "—");
+                document.getElementById("txtAlimentacion").textContent = p.alimentacion || (timelineData.historia && timelineData.historia.alimentacion) || "—";
+
+                const dueno = [p.propietario, p.propietario_apellido].filter(Boolean).join(" ");
+                document.getElementById("txtPropietario").textContent = dueno || "Sin tutor asignado";
+                document.getElementById("txtCedula").textContent = p.cedula || "—";
+                document.getElementById("txtTelefono").textContent = p.telefono || "—";
+                document.getElementById("txtDireccion").textContent = p.direccion || "—";
+
+                // Fotografía cuadrada estilo carné o Avatar si no tiene foto
+                const boxFoto = document.getElementById("boxFotoCarnet");
+                if (p.foto_url) {
+                    boxFoto.innerHTML = `<img src="${Cairo.esc(p.foto_url)}" alt="Foto de ${Cairo.esc(p.nombre)}">`;
+                } else if (p.avatar_data) {
+                    boxFoto.innerHTML = CairoAvatar.svg(p.avatar_data, p.especie || "Gato");
+                } else {
+                    boxFoto.innerHTML = `<span class="fw-bold fs-1 text-dark">${Cairo.esc((p.nombre || "P")[0].toUpperCase())}</span>`;
+                }
+
+                document.title = `Historial Clínico: ${p.nombre} · Proyecto CAIRO`;
+            }
+
+            function renderizarContadores(c) {
+                if (!c) return;
+                document.getElementById("badgeAll").textContent = c.total || 0;
+                document.getElementById("badgeConsultas").textContent = c.consultas || 0;
+                document.getElementById("badgeVacunas").textContent = c.vacunaciones || 0;
+                document.getElementById("badgeDesp").textContent = c.desparasitaciones || 0;
+                document.getElementById("badgeCirugias").textContent = c.cirugias || 0;
+            }
+
+            function renderizarFeed() {
+                const feed = document.getElementById("feedRegistrosClinicos");
+                const atenciones = timelineData.atenciones || [];
+                const legacy = timelineData.procedimientos_legacy || [];
+
+                // Filtrar según la opción seleccionada
+                let items = [];
+
+                if (filtroActual === "all") {
+                    items = [...atenciones];
+                } else if (filtroActual === "consultas") {
+                    items = atenciones.filter(a => a.tipo_servicio === "Consulta General" || a.tipo_servicio === "Consulta" || (!a.tipo_vacuna && !a.tipo_interna_externa && !a.tipo_cirugia));
+                } else if (filtroActual === "vacunaciones") {
+                    items = atenciones.filter(a => a.tipo_servicio === "Vacunación" || a.tipo_vacuna);
+                } else if (filtroActual === "desparasitaciones") {
+                    items = atenciones.filter(a => a.tipo_servicio === "Desparasitación" || a.tipo_interna_externa);
+                } else if (filtroActual === "cirugias") {
+                    items = atenciones.filter(a => ["Castración", "Esterilización"].includes(a.tipo_servicio) || a.tipo_cirugia);
+                }
+
+                document.getElementById("timelineConteo").textContent = `${items.length} registro(s)`;
+
+                const titulos = {
+                    all: "Todas las Atenciones Médicas",
+                    consultas: "Consultas Médicas Generales",
+                    vacunaciones: "Registro de Vacunaciones",
+                    desparasitaciones: "Control de Desparasitaciones",
+                    cirugias: "Castración / Esterilización y Cirugías"
+                };
+                document.getElementById("timelineTitulo").textContent = titulos[filtroActual] || "Historial Clínico";
+
+                // Estado vacío si no hay registros
+                if (!items.length) {
+                    feed.innerHTML = `
+                        <div class="bg-white p-5 border rounded-3 text-center shadow-sm">
+                            <h4 class="h6 fw-bold text-dark mb-2">No se encontraron registros de ${titulos[filtroActual]}</h4>
+                            <p class="text-muted small mb-3">Puedes registrar una nueva atención médica para este paciente en cualquier momento.</p>
+                            <a href="${urlNuevaAtencion}" class="btn btn-sm btn-outline-dark fw-bold">+ Registrar Atención</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Generar tarjetas de registros clínicos
+                feed.innerHTML = items.map(item => {
+                    const tipo = item.tipo_servicio || "Consulta General";
+
+                    // Signos vitales chips
+                    const vitals = [];
+                    if (item.temperatura) vitals.push(`<span class="vital-chip">Temperatura: <strong>${Cairo.esc(item.temperatura)} °C</strong></span>`);
+                    if (item.frecuencia_cardiaca) vitals.push(`<span class="vital-chip">FC: <strong>${Cairo.esc(item.frecuencia_cardiaca)} lpm</strong></span>`);
+                    if (item.frecuencia_respiratoria) vitals.push(`<span class="vital-chip">FR: <strong>${Cairo.esc(item.frecuencia_respiratoria)} rpm</strong></span>`);
+                    if (item.peso) vitals.push(`<span class="vital-chip">Peso: <strong>${Cairo.esc(item.peso)} kg</strong></span>`);
+
+                    // Submódulos específicos según el tipo de servicio
+                    let servicioDetalle = "";
+
+                    // Vacunación
+                    if (item.tipo_vacuna) {
+                        servicioDetalle += `
+                            <div class="p-3 bg-light rounded-3 border mb-3">
+                                <div class="fw-bold small text-success text-uppercase mb-2">Vacunación Aplicada</div>
+                                <div class="row g-2 small">
+                                    <div class="col-sm-6"><strong>Biológico / Vacuna:</strong> ${Cairo.esc(item.tipo_vacuna)}</div>
+                                    <div class="col-sm-6"><strong>Próxima cita / dosis:</strong> ${Cairo.esc(item.vacuna_proxima_dosis || "No programada")}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Desparasitación
+                    if (item.desparasitante_producto || item.tipo_interna_externa) {
+                        servicioDetalle += `
+                            <div class="p-3 bg-light rounded-3 border mb-3">
+                                <div class="fw-bold small text-primary text-uppercase mb-2">Control de Desparasitación</div>
+                                <div class="row g-2 small">
+                                    <div class="col-sm-4"><strong>Vía / Tipo:</strong> ${Cairo.esc(item.tipo_interna_externa || "Mixta")}</div>
+                                    <div class="col-sm-4"><strong>Producto utilizado:</strong> ${Cairo.esc(item.desparasitante_producto || "—")}</div>
+                                    <div class="col-sm-4"><strong>Próxima dosis:</strong> ${Cairo.esc(item.desparasitante_peso ? item.desparasitante_peso : "—")}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Castración / Esterilización
+                    if (item.tipo_cirugia || ["Castración", "Esterilización"].includes(item.tipo_servicio)) {
+                        servicioDetalle += `
+                            <div class="p-3 bg-light rounded-3 border mb-3">
+                                <div class="fw-bold small text-dark text-uppercase mb-2">Procedimiento Quirúrgico (Castración / Esterilización)</div>
+                                <div class="small"><strong>Intervención:</strong> ${Cairo.esc(item.tipo_cirugia || item.tipo_servicio)}</div>
+                                ${item.cirugia_complicaciones ? `<div class="small text-danger mt-1"><strong>Complicaciones:</strong> ${Cairo.esc(item.cirugia_complicaciones)}</div>` : ""}
+                            </div>
+                        `;
+                    }
+
+                    // Examen Físico
+                    const efCampos = [];
+                    if (item.hidratacion) efCampos.push(`<strong>Hidratación:</strong> ${Cairo.esc(item.hidratacion)}`);
+                    if (item.mucosa) efCampos.push(`<strong>Mucosas:</strong> ${Cairo.esc(item.mucosa)}`);
+                    if (item.estado_general) efCampos.push(`<strong>Estado:</strong> ${Cairo.esc(item.estado_general)}`);
+                    if (item.palpacion_abdominal) efCampos.push(`<strong>Palpación abdominal:</strong> ${Cairo.esc(item.palpacion_abdominal)}`);
+
+                    // Receta médica y fármacos
+                    let recetaHtml = "";
+                    const farmacos = item.farmacos || [];
+                    if (item.indicaciones || farmacos.length > 0) {
+                        recetaHtml = `
+                            <div class="record-prescription-box">
+                                <div class="fw-bold small text-uppercase mb-2 text-dark">Prescripción e Indicaciones Médicas</div>
+                                ${item.indicaciones ? `<div class="mb-2 small" style="white-space: pre-line;">${Cairo.esc(item.indicaciones)}</div>` : ""}
+                                ${farmacos.length > 0 ? `
+                                    <div class="table-responsive bg-white rounded border mt-2">
+                                        <table class="table tabla-farmacos-record mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Medicamento</th>
+                                                    <th>Dosis</th>
+                                                    <th>Vía</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Próxima cita</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${farmacos.map(f => `
+                                                    <tr>
+                                                        <td class="fw-bold">${Cairo.esc(f.medicamento)}</td>
+                                                        <td>${Cairo.esc(f.dosis || "—")}</td>
+                                                        <td>${Cairo.esc(f.via || "Oral")}</td>
+                                                        <td>${Cairo.esc(f.cantidad || "—")}</td>
+                                                        <td>${Cairo.esc(f.proxima_cita || "—")}</td>
+                                                    </tr>
+                                                `).join("")}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ` : ""}
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="record-card">
+                            <div class="record-card-header">
+                                <div class="record-service-title">
+                                    <span>${Cairo.esc(tipo)}</span>
+                                    <span class="badge bg-white text-dark border px-2 py-1">${Cairo.esc(Cairo.fmt.fecha(item.fecha_atencion) || item.fecha_atencion || "Hoy")}</span>
+                                </div>
+                                <span class="text-muted small fw-semibold">Personal Médico Proyecto CAIRO</span>
+                            </div>
+
+                            <div class="record-card-body">
+                                
+                                <!-- Motivo de consulta -->
+                                ${item.motivo_consulta ? `
+                                    <div class="mb-3">
+                                        <div class="patient-data-label">Motivo de consulta</div>
+                                        <div class="text-dark small" style="white-space: pre-line;">${Cairo.esc(item.motivo_consulta)}</div>
+                                    </div>
+                                ` : ""}
+
+                                <!-- Diagnóstico preliminar / definitivo -->
+                                ${item.diagnostico ? `
+                                    <div class="p-2 border rounded bg-light small mb-3">
+                                        <strong class="text-dark">Diagnóstico preliminar / definitivo:</strong>
+                                        <span class="text-dark">${Cairo.esc(item.diagnostico)}</span>
+                                    </div>
+                                ` : ""}
+
+                                <!-- Signos vitales chips -->
+                                ${vitals.length ? `
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        ${vitals.join("")}
+                                    </div>
+                                ` : ""}
+
+                                <!-- Submódulos específicos -->
+                                ${servicioDetalle}
+
+                                <!-- Examen Físico -->
+                                ${efCampos.length ? `
+                                    <div class="mb-3 p-2 bg-light rounded small">
+                                        <div class="fw-bold text-muted text-uppercase mb-1" style="font-size: 0.72rem;">Examen Físico:</div>
+                                        <div class="d-flex flex-wrap gap-3">
+                                            ${efCampos.map(c => `<div>${c}</div>`).join("")}
+                                        </div>
+                                    </div>
+                                ` : ""}
+
+                                <!-- Observaciones -->
+                                ${item.observaciones ? `
+                                    <div class="small text-muted mb-2"><strong>Observaciones:</strong> ${Cairo.esc(item.observaciones)}</div>
+                                ` : ""}
+
+                                <!-- Receta y medicamentos / Indicaciones -->
+                                ${recetaHtml}
+
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+            }
+
+            Cairo.ready.then(() => {
+                const btnNueva = document.getElementById("btnNuevaAtencion");
+                if (btnNueva) btnNueva.href = urlNuevaAtencion;
+                const btnImp = document.getElementById("btnImprimir");
+                if (btnImp) btnImp.addEventListener("click", () => window.print());
+                cargarHistorial();
+            }).catch(err => {
+                console.error("Error al inicializar:", err);
+                Cairo.toast("Error: " + err.message, "error");
+            });
+
+        })();
+    </script>
+</body>
+
+</html>

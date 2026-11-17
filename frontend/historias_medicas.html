@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historias Médicas · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+    <style>
+        :root {
+            --cairo-vanilla: #F3EABF;
+            --cairo-vanilla-soft: #FAF4D3;
+            --cairo-vanilla-light: #FDF6E2;
+            --cairo-vanilla-border: #E8DC9E;
+            --cairo-text: #1A1A1A;
+            --cairo-text-muted: #4A5568;
+            --cairo-primary: #C98B27;
+        }
+
+        body {
+            background-color: #F8F9FA;
+            color: var(--cairo-text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Buscador principal */
+        .search-panel-box {
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 22px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .search-input-main {
+            font-size: 0.95rem;
+            padding: 10px 14px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+        }
+
+        .search-input-main:focus {
+            border-color: #C98B27;
+            box-shadow: 0 0 0 3px rgba(201, 139, 39, 0.15);
+        }
+
+        /* Tabla de Historias Médicas */
+        .table-historias th {
+            background-color: var(--cairo-vanilla-soft);
+            color: #2D2206;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            border-bottom: 1px solid var(--cairo-vanilla-border);
+            padding: 12px 14px;
+        }
+
+        .table-historias td {
+            padding: 12px 14px;
+            vertical-align: middle;
+            border-bottom: 1px solid #F1F5F9;
+            font-size: 0.90rem;
+        }
+
+        .table-historias tbody tr {
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .table-historias tbody tr:hover {
+            background-color: #FAF8F2;
+        }
+
+        /* Recuadro de foto estilo carné en tabla */
+        .pet-photo-carnet-sm {
+            width: 48px;
+            min-width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background-color: #FAF8F2;
+            border: 1.5px solid var(--cairo-vanilla-border);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+        }
+
+        .pet-photo-carnet-sm img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .pet-photo-carnet-sm svg {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+        }
+
+        /* Botón de acción para ver historial */
+        .btn-ver-historial {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            color: #334155;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+
+        .btn-ver-historial:hover {
+            background-color: var(--cairo-vanilla-soft);
+            border-color: var(--cairo-vanilla-border);
+            color: #1A1A1A;
+        }
+
+        /* Componente de foto / avatar grande en el modal */
+        .modal-photo-carnet-lg {
+            width: 160px;
+            min-width: 160px;
+            height: 160px;
+            border-radius: 12px;
+            background-color: #FAF8F2;
+            border: 2px solid var(--cairo-vanilla-border);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin: 0 auto;
+        }
+
+        .modal-photo-carnet-lg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-photo-carnet-lg svg {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+        }
+
+        /* Bloques de datos clínicos en el modal */
+        .modal-data-block {
+            background-color: #FAF8F2;
+            border: 1px solid var(--cairo-vanilla-border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 14px;
+        }
+
+        .modal-data-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4A3C10;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(232, 220, 158, 0.6);
+            padding-bottom: 4px;
+        }
+
+        .modal-field-label {
+            font-size: 0.74rem;
+            color: #64748B;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+        }
+
+        .modal-field-value {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--cairo-text);
+            line-height: 1.25;
+        }
+
+        /* Chips para Signos Vitales */
+        .vital-chip-modal {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #475569;
+        }
+
+        .vital-chip-modal strong {
+            color: var(--cairo-text);
+        }
+
+        /* Tabla de fármacos en modal */
+        .tabla-farmacos-modal th {
+            background-color: #F8FAFC;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #334155;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .tabla-farmacos-modal td {
+            font-size: 0.86rem;
+            padding: 7px 10px;
+            vertical-align: middle;
+        }
+
+        @media print {
+            .no-print, .shell, #acciones, .search-panel-box, .btn-ver-historial { display: none !important; }
+            body { background: #FFFFFF; }
+            .modal-content { border: none !important; box-shadow: none !important; }
+            .modal-dialog { max-width: 100% !important; margin: 0 !important; }
+            .modal-footer { display: none !important; }
+            @page { size: 8.5in 13in; margin: 0.45in; }
+            body > * { display: none !important; }
+            #fichaImprimible {
+                display: block !important;
+                position: relative !important;
+                visibility: visible !important;
+                color: #111 !important;
+            }
+            #fichaImprimible * { visibility: visible !important; }
+            #fichaImprimible .ficha-oficio-reglas { z-index: 0 !important; }
+            #fichaImprimible .ficha-oficio-contenido {
+                display: block !important;
+                position: relative !important;
+                z-index: 1 !important;
+                visibility: visible !important;
+                color: #111 !important;
+                white-space: pre-wrap !important;
+            }
+        }
+
+        #fichaImprimible { display: none; }
+
+        .ficha-oficio {
+            color: #111;
+            font-family: "Times New Roman", serif;
+            font-size: 11pt;
+        }
+
+        .ficha-oficio-cabecera {
+            position: relative;
+            min-height: 2.1in;
+            text-align: center;
+        }
+
+        .ficha-oficio-logo { width: 1.15in; height: .9in; object-fit: contain; }
+        .ficha-oficio-numero { position: absolute; top: .25in; right: 0; }
+        .ficha-oficio-titulo { margin: .08in 0 0; font-size: 15pt; text-decoration: underline; }
+        .ficha-oficio-foto {
+            position: absolute;
+            top: .85in;
+            right: 0;
+            width: 1.15in;
+            height: 1.4in;
+            border: 1px solid #333;
+            object-fit: contain;
+            background: #fff;
+        }
+
+        .ficha-oficio-datos { display: grid; grid-template-columns: 1fr 1fr; gap: .55in; margin-top: .2in; }
+        .ficha-oficio-datos h2, .ficha-oficio-seccion h2 { font-size: 12pt; font-weight: 700; margin: 0 0 .04in; }
+        .ficha-oficio-linea { min-height: .26in; border-bottom: 1px solid #555; padding: .025in .04in; }
+        .ficha-oficio-seccion { margin-top: .42in; break-inside: avoid; }
+        .ficha-oficio-texto {
+            position: relative;
+            min-height: 2.08in;
+        }
+
+        .ficha-oficio-texto-hallazgos { min-height: 3.64in; }
+
+        .ficha-oficio-reglas {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .ficha-oficio-reglas span {
+            flex: 1;
+            border-bottom: 1px solid #777;
+        }
+
+        .ficha-oficio-contenido {
+            position: relative;
+            z-index: 1;
+            min-height: inherit;
+            padding: .08in .04in 0;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            line-height: .26in;
+        }
+
+        @media print {
+            .ficha-oficio { display: block; }
+            .ficha-oficio-seccion { break-inside: auto; }
+        }
+    </style>
+</head>
+
+<body data-active="historias" data-title="Historias Médicas" data-crumb="Historias Médicas">
+
+    <template id="acciones">
+        <button class="btn btn-soft" id="btnExportarExcel">Exportar Excel</button>
+        <a href="formulario_paciente.html" class="btn cairo-btn">+ Nueva Atención / Consulta</a>
+    </template>
+
+    <main id="contenido">
+        <div class="container-fluid px-0 px-md-2" style="max-width: 1220px;">
+
+            <!-- BARRA DE BÚSQUEDA: POR PROPIETARIO, CÉDULA O MASCOTA -->
+            <div class="search-panel-box">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-7">
+                        <input type="search" id="inputBusqueda" class="form-control search-input-main"
+                            placeholder="Buscar por nombre o cédula del propietario, o nombre de la mascota…">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="visually-hidden" for="filtroEspecieHistorias">Filtrar por especie</label>
+                        <select id="filtroEspecieHistorias" class="form-select">
+                            <option value="">Todas las especies</option>
+                            <option>Gato</option>
+                            <option>Perro</option>
+                            <option>Otro</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-search-cairo w-100 justify-content-center" id="btnEjecutarBusqueda">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLA DE PACIENTES REGISTRADOS CON SU HISTORIAL -->
+            <div class="cairo-card p-0 shadow-sm border rounded-3 overflow-hidden bg-white mb-5">
+                <div class="table-responsive">
+                    <table class="table table-historias mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Mascota</th>
+                                <th style="width: 11%;">Código</th>
+                                <th style="width: 10%;">Género</th>
+                                <th style="width: 22%;">Propietario</th>
+                                <th style="width: 12%;">Fecha Consulta</th>
+                                <th style="width: 20%;">Motivo de Consulta</th>
+                                <th style="width: 10%; text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyHistorias">
+                            <tr>
+                                <td colspan="7" class="py-4">
+                                    <div class="d-flex align-items-center gap-3 px-2" role="status" aria-label="Cargando historias médicas">
+                                        <span class="skeleton skeleton-avatar"></span>
+                                        <div class="flex-grow-1 d-grid gap-2">
+                                            <span class="skeleton skeleton-line skeleton-line-lg"></span>
+                                            <span class="skeleton skeleton-line skeleton-line-sm"></span>
+                                        </div>
+                                        <span class="skeleton skeleton-line d-none d-md-block" style="width: 12%"></span>
+                                        <span class="skeleton skeleton-line d-none d-md-block" style="width: 15%"></span>
+                                        <span class="skeleton skeleton-button d-none d-md-block"></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- VENTANA MODAL DE EXPEDIENTE CLÍNICO COMPLETO -->
+    <div class="modal fade" id="modalDetalleExpediente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                
+                <div class="modal-header py-3 px-4 border-bottom" style="background-color: var(--cairo-vanilla-soft);">
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="modal-title fs-5 fw-bold text-dark mb-0" id="mTxtNombreTitulo">Expediente Clínico</h4>
+                        <span class="badge bg-white text-dark border fw-bold px-2 py-1" id="mTxtCodigoTitulo">PAC-0000</span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    
+                    <div class="row g-4 mb-3">
+                        <!-- FOTO CUADRADA ESTILO CARNÉ O AVATAR (IZQUIERDA) -->
+                        <div class="col-md-3 text-center">
+                            <div class="modal-photo-carnet-lg" id="mBoxFotoCarnet">
+                                <span class="text-muted small">Sin imagen</span>
+                            </div>
+                            <div class="mt-2 text-muted small fw-semibold" id="mTxtSubfoto">—</div>
+                        </div>
+
+                        <!-- DATOS CLÍNICOS GENERALES -->
+                        <div class="col-md-9">
+                            
+                            <!-- Bloque: Datos del Animal -->
+                            <div class="modal-data-block">
+                                <div class="modal-data-title">Datos del Paciente</div>
+                                <div class="row g-2">
+                                    <div class="col-6 col-sm-3">
+                                        <div class="modal-field-label">Nombre</div>
+                                        <div class="modal-field-value text-dark" id="mTxtNombre">—</div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="modal-field-label">Especie</div>
+                                        <div class="modal-field-value" id="mTxtEspecie">—</div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="modal-field-label">Raza</div>
+                                        <div class="modal-field-value text-truncate" id="mTxtRaza">—</div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="modal-field-label">Género</div>
+                                        <div class="modal-field-value" id="mTxtGenero">—</div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="modal-field-label">Edad</div>
+                                        <div class="modal-field-value" id="mTxtEdad">—</div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="modal-field-label">Peso actual</div>
+                                        <div class="modal-field-value" id="mTxtPeso">—</div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="modal-field-label">Alimentación</div>
+                                        <div class="modal-field-value text-truncate" id="mTxtAlimentacion">—</div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="modal-field-label">Estado General</div>
+                                        <div class="modal-field-value" id="mTxtEstadoGeneral">—</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bloque: Datos del Propietario -->
+                            <div class="modal-data-block">
+                                <div class="modal-data-title">Datos del Propietario Responsable</div>
+                                <div class="row g-2">
+                                    <div class="col-12 col-sm-4">
+                                        <div class="modal-field-label">Propietario</div>
+                                        <div class="modal-field-value" id="mTxtPropietario">—</div>
+                                    </div>
+                                    <div class="col-6 col-sm-2">
+                                        <div class="modal-field-label">Cédula</div>
+                                        <div class="modal-field-value" id="mTxtCedula">—</div>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <div class="modal-field-label">Teléfono</div>
+                                        <div class="modal-field-value" id="mTxtTelefono">—</div>
+                                    </div>
+                                    <div class="col-12 col-sm-3">
+                                        <div class="modal-field-label">Dirección</div>
+                                        <div class="modal-field-value text-truncate" id="mTxtDireccion">—</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- DETALLES DE LA ATENCIÓN / CONSULTA REGISTRADA -->
+                    <div class="card border mb-3">
+                        <div class="card-header py-2 px-3 fw-bold" style="background-color: var(--cairo-vanilla-soft); font-size: 0.88rem;">
+                            Consulta y Atención Clínica
+                        </div>
+                        <div class="card-body p-3">
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <div class="modal-field-label">Tipo de consulta</div>
+                                    <span class="badge bg-light text-dark border px-2 py-1 fw-bold fs-6" id="mTxtTipoConsulta">—</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="modal-field-label">Fecha de consulta</div>
+                                    <div class="fw-bold text-dark" id="mTxtFechaConsulta">—</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="modal-field-label">Responsable</div>
+                                    <div class="fw-semibold text-muted" id="mTxtResponsable">Personal Clínico Cairo</div>
+                                </div>
+                            </div>
+
+                            <!-- Motivo de Consulta -->
+                            <div class="mb-3">
+                                <div class="modal-field-label">Motivo de consulta</div>
+                                <div class="p-2 bg-light border rounded small" id="mTxtMotivoConsulta">—</div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <div class="modal-field-label">Historia</div>
+                                    <div class="p-2 bg-light border rounded small" id="mTxtHistoria" style="white-space: pre-line;">—</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="modal-field-label">Hallazgos</div>
+                                    <div class="p-2 bg-light border rounded small" id="mTxtHallazgos" style="white-space: pre-line;">—</div>
+                                </div>
+                            </div>
+
+                            <!-- Diagnóstico -->
+                            <div class="mb-3" id="mBoxDiagnostico">
+                                <div class="modal-field-label">Diagnóstico preliminar / definitivo</div>
+                                <div class="p-2 border rounded fw-semibold text-dark small" id="mTxtDiagnostico" style="background-color: #FAF8F2;">—</div>
+                            </div>
+
+                            <!-- Signos Vitales -->
+                            <div class="mb-3">
+                                <div class="modal-field-label mb-1">Signos Vitales</div>
+                                <div class="d-flex flex-wrap gap-2" id="mBoxSignosVitales">
+                                    <span class="vital-chip-modal">Temperatura: <strong id="mTxtTemperatura">—</strong></span>
+                                    <span class="vital-chip-modal">FC: <strong id="mTxtCardiaca">—</strong></span>
+                                    <span class="vital-chip-modal">FR: <strong id="mTxtRespiratoria">—</strong></span>
+                                    <span class="vital-chip-modal">Peso: <strong id="mTxtPesoSV">—</strong></span>
+                                </div>
+                            </div>
+
+                            <!-- Examen Físico -->
+                            <div class="mb-3 p-2 bg-light rounded border" id="mBoxExamenFisico">
+                                <div class="modal-field-label mb-1">Hallazgos del Examen Físico</div>
+                                <div class="row g-2 small">
+                                    <div class="col-sm-4"><strong>Hidratación:</strong> <span id="mTxtHidratacion">—</span></div>
+                                    <div class="col-sm-4"><strong>Mucosa:</strong> <span id="mTxtMucosa">—</span></div>
+                                    <div class="col-sm-4"><strong>Palpación abdominal:</strong> <span id="mTxtPalpacion">—</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Observaciones -->
+                            <div class="mb-3" id="mBoxObservaciones">
+                                <div class="modal-field-label">Observaciones</div>
+                                <div class="small text-dark" id="mTxtObservaciones">—</div>
+                            </div>
+
+                            <!-- Tratamiento e Indicaciones Médicas -->
+                            <div class="p-3 border rounded" style="background-color: var(--cairo-vanilla-soft);" id="mBoxTratamiento">
+                                <div class="fw-bold small text-uppercase text-dark mb-2">Tratamiento e Indicaciones Médicas</div>
+                                <div class="small mb-2" id="mTxtIndicaciones" style="white-space: pre-line;">—</div>
+                                
+                                <div id="mContenedorTablaFarmacos" class="table-responsive bg-white rounded border mt-2 d-none">
+                                    <table class="table tabla-farmacos-modal mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Medicamento</th>
+                                                <th>Dosis</th>
+                                                <th>Vía</th>
+                                                <th>Cantidad</th>
+                                                <th>Próxima cita</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="mBodyFarmacos"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer py-2 px-4 justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnExportarFicha">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                <rect x="6" y="14" width="12" height="8"></rect>
+                            </svg>
+                            Exportar ficha oficio
+                        </button>
+                        <a href="#" id="mBtnVerTimelineCompleto" class="btn btn-sm btn-outline-dark ms-2 fw-semibold">
+                            Ver Historial Cronológico
+                        </a>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <section id="fichaImprimible" class="ficha-oficio" aria-hidden="true">
+        <header class="ficha-oficio-cabecera">
+            <img class="ficha-oficio-logo" src="img/logo-historia.png" alt="CAIRO">
+            <div class="ficha-oficio-numero">N.º <span id="fNumeroFolio">________________</span></div>
+            <h1 class="ficha-oficio-titulo">HISTORIA MÉDICA</h1>
+            <img class="ficha-oficio-foto d-none" id="fFotoPaciente" alt="Fotografía o avatar del paciente">
+        </header>
+        <div class="ficha-oficio-datos">
+            <section>
+                <h2>DATOS DEL PROPIETARIO</h2>
+                <div class="ficha-oficio-linea">Nombres: <span id="fPropietario"></span></div>
+                <div class="ficha-oficio-linea">Apellidos: <span id="fApellido"></span></div>
+                <div class="ficha-oficio-linea">Cédula Id: <span id="fCedula"></span></div>
+                <div class="ficha-oficio-linea">Dirección: <span id="fDireccion"></span></div>
+                <div class="ficha-oficio-linea">Teléfono: <span id="fTelefono"></span></div>
+                <div class="ficha-oficio-linea">Correo: <span id="fCorreo"></span></div>
+            </section>
+            <section>
+                <h2>DATOS DEL PACIENTE</h2>
+                <div class="ficha-oficio-linea">Fecha de admisión: <span id="fFechaAdmision"></span></div>
+                <div class="ficha-oficio-linea">Nombre: <span id="fNombre"></span></div>
+                <div class="ficha-oficio-linea">Especie: <span id="fEspecie"></span><span style="float:right">Raza: <span id="fRaza"></span></span></div>
+                <div class="ficha-oficio-linea">Sexo: <span id="fSexo"></span><span style="float:right">Edad: <span id="fEdad"></span></span></div>
+                <div class="ficha-oficio-linea">Alimentación: <span id="fAlimentacion"></span></div>
+                <div class="ficha-oficio-linea">Fecha de nacimiento: <span id="fNacimiento"></span></div>
+                <div class="ficha-oficio-linea">Temperatura: <span id="fTemperatura"></span><span style="float:right">Peso: <span id="fPeso"></span></span></div>
+                <div class="ficha-oficio-linea">Respiración: <span id="fRespiracion"></span></div>
+                <div class="ficha-oficio-linea">Hidratación: <span id="fHidratacion"></span></div>
+            </section>
+        </div>
+        <section class="ficha-oficio-seccion">
+            <h2>HISTORIA:</h2>
+            <div class="ficha-oficio-texto">
+                <div class="ficha-oficio-reglas" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span>
+                </div>
+                <div class="ficha-oficio-contenido" id="fHistoria"></div>
+            </div>
+        </section>
+        <section class="ficha-oficio-seccion">
+            <h2>HALLAZGOS:</h2>
+            <div class="ficha-oficio-texto ficha-oficio-texto-hallazgos">
+                <div class="ficha-oficio-reglas" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span><span></span><span></span>
+                    <span></span><span></span>
+                </div>
+                <div class="ficha-oficio-contenido" id="fHallazgos"></div>
+            </div>
+        </section>
+    </section>
+
+    <!-- Scripts Bootstrap, Cairo y Avatar -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/avatar.js"></script>
+
+    <script>
+        (function () {
+            "use strict";
+
+            const tbody = document.getElementById("tbodyHistorias");
+            const inputBusqueda = document.getElementById("inputBusqueda");
+            const filtroEspecie = document.getElementById("filtroEspecieHistorias");
+            const btnBuscar = document.getElementById("btnEjecutarBusqueda");
+            const modalEl = document.getElementById("modalDetalleExpediente");
+            const btnExportarFicha = document.getElementById("btnExportarFicha");
+            const modalExpediente = new bootstrap.Modal(modalEl);
+            const pacienteIdInicial = new URLSearchParams(window.location.search).get("id");
+
+            let listaHistorias = [];
+
+            function historiasVisibles() {
+                return filtroEspecie.value
+                    ? listaHistorias.filter((historia) => historia.especie === filtroEspecie.value)
+                    : listaHistorias;
+            }
+
+            function mostrarSkeletonHistorias() {
+                tbody.innerHTML = Array.from({ length: 3 }, () => `
+                    <tr>
+                        <td colspan="7" class="py-3">
+                            <div class="d-flex align-items-center gap-3 px-2" aria-hidden="true">
+                                <span class="skeleton skeleton-avatar"></span>
+                                <div class="flex-grow-1 d-grid gap-2">
+                                    <span class="skeleton skeleton-line skeleton-line-lg"></span>
+                                    <span class="skeleton skeleton-line skeleton-line-sm"></span>
+                                </div>
+                                <span class="skeleton skeleton-line d-none d-md-block" style="width: 12%"></span>
+                                <span class="skeleton skeleton-line d-none d-md-block" style="width: 15%"></span>
+                                <span class="skeleton skeleton-button d-none d-md-block"></span>
+                            </div>
+                        </td>
+                    </tr>
+                `).join("");
+            }
+
+            async function cargarHistorias() {
+                const q = inputBusqueda.value.trim();
+                const params = new URLSearchParams();
+                if (q) params.set("q", q);
+                if (pacienteIdInicial && /^\d+$/.test(pacienteIdInicial)) params.set("id", pacienteIdInicial);
+                mostrarSkeletonHistorias();
+
+                try {
+                    listaHistorias = await Cairo.api("/historias-medicas?" + params.toString());
+                    renderizarTabla();
+                    if (pacienteIdInicial && !modalEl.dataset.pacienteId) {
+                        const paciente = listaHistorias.find((item) => String(item.id) === pacienteIdInicial);
+                        if (paciente) {
+                            modalEl.dataset.pacienteId = paciente.id;
+                            abrirModalExpediente(paciente.id);
+                        }
+                    }
+                } catch (err) {
+                    Cairo.toast("Error al cargar historias: " + err.message, "error");
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">Error al cargar datos: ${Cairo.esc(err.message)}</td></tr>`;
+                }
+            }
+
+            function renderizarTabla() {
+                const visibles = historiasVisibles();
+                if (!visibles.length) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No se encontraron pacientes ni historias médicas que coincidan.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = visibles.map(p => {
+                    const nombreCompletoPropietario = [p.propietario, p.propietario_apellido].filter(Boolean).join(" ") || "Sin tutor asignado";
+                    const cedulaPropietario = p.cedula ? `CI: ${Cairo.esc(p.cedula)}` : "Sin cédula";
+                    const fechaConsulta = p.fecha_atencion || p.admision ? Cairo.fmt.fecha(p.fecha_atencion || p.admision) : "—";
+                    const motivoConsulta = p.motivo_consulta || "Consulta de registro clínico";
+                    const genero = p.genero || p.sexo || "—";
+
+                    // Imagen / Avatar del animal (estilo carné cuadrado)
+                    let thumb = "";
+                    if (p.foto_url) {
+                        thumb = `<img src="${Cairo.esc(p.foto_url)}" alt="Foto de ${Cairo.esc(p.nombre)}">`;
+                    } else if (p.avatar_data) {
+                        thumb = CairoAvatar.svg(p.avatar_data, p.especie || "Gato");
+                    } else {
+                        thumb = `<span class="fw-bold text-muted">${Cairo.esc((p.nombre || "P")[0].toUpperCase())}</span>`;
+                    }
+
+                    return `
+                        <tr data-paciente-id="${p.id}">
+                            <!-- 1. Mascota con su foto o avatar -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="pet-photo-carnet-sm">
+                                        ${thumb}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">${Cairo.esc(p.nombre)}</div>
+                                        <small class="text-muted" style="font-size: 0.74rem;">${Cairo.esc(p.especie || "")}${p.raza ? " · " + Cairo.esc(p.raza) : ""}</small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- 2. Código -->
+                            <td>
+                                <span class="badge bg-light text-dark border fw-bold">${Cairo.esc(p.codigo || `PAC-${p.id}`)}</span>
+                            </td>
+
+                            <!-- 3. Género (Cambiado de Sexo a Género) -->
+                            <td>
+                                <span class="text-dark">${Cairo.esc(genero)}</span>
+                            </td>
+
+                            <!-- 4. Propietario (Nombre y Cédula) -->
+                            <td>
+                                <div class="fw-bold text-dark" style="font-size: 0.88rem;">${Cairo.esc(nombreCompletoPropietario)}</div>
+                                <div class="text-muted small" style="font-size: 0.76rem;">${cedulaPropietario}</div>
+                            </td>
+
+                            <!-- 5. Fecha de consulta -->
+                            <td>
+                                <span class="text-dark small fw-semibold">${fechaConsulta}</span>
+                            </td>
+
+                            <!-- 6. Motivo de consulta -->
+                            <td>
+                                <span class="text-muted small text-truncate d-block" style="max-width: 200px;" title="${Cairo.esc(motivoConsulta)}">
+                                    ${Cairo.esc(motivoConsulta)}
+                                </span>
+                            </td>
+
+                            <!-- 7. Acciones -->
+                            <td class="text-end text-nowrap">
+                                <button type="button" class="btn-ver-historial" data-action="ver" data-id="${p.id}" title="Ver expediente de ${Cairo.esc(p.nombre)}">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    Ver historial
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join("");
+            }
+
+            // Al hacer clic en un paciente, abre la ventana modal con todos los datos registrados
+            function abrirModalExpediente(pacienteId) {
+                const p = listaHistorias.find(item => Number(item.id) === Number(pacienteId));
+                if (!p) return;
+
+                // Títulos
+                document.getElementById("mTxtNombreTitulo").textContent = `Expediente de ${p.nombre}`;
+                document.getElementById("mTxtCodigoTitulo").textContent = p.codigo || `PAC-${p.id}`;
+
+                // Foto o Avatar
+                const boxFoto = document.getElementById("mBoxFotoCarnet");
+                if (p.foto_url) {
+                    boxFoto.innerHTML = `<img src="${Cairo.esc(p.foto_url)}" alt="Foto de ${Cairo.esc(p.nombre)}">`;
+                    document.getElementById("mTxtSubfoto").textContent = "Fotografía registrada";
+                } else if (p.avatar_data) {
+                    boxFoto.innerHTML = CairoAvatar.svg(p.avatar_data, p.especie || "Gato");
+                    document.getElementById("mTxtSubfoto").textContent = "Avatar personalizado";
+                } else {
+                    boxFoto.innerHTML = `<span class="fw-bold fs-1 text-dark">${Cairo.esc((p.nombre || "P")[0].toUpperCase())}</span>`;
+                    document.getElementById("mTxtSubfoto").textContent = "Sin fotografía";
+                }
+
+                // Datos de la mascota
+                document.getElementById("mTxtNombre").textContent = p.nombre || "—";
+                document.getElementById("mTxtEspecie").textContent = p.especie || "—";
+                document.getElementById("mTxtRaza").textContent = p.raza || "Mestizo";
+                document.getElementById("mTxtGenero").textContent = p.genero || p.sexo || "—";
+                document.getElementById("mTxtEdad").textContent = p.edad || "—";
+                document.getElementById("mTxtPeso").textContent = p.peso ? `${p.peso} kg` : "—";
+                document.getElementById("mTxtAlimentacion").textContent = p.alimentacion || "No especificada";
+                document.getElementById("mTxtEstadoGeneral").textContent = p.estado_general || "Normal / Estable";
+
+                // Datos del propietario
+                const nombreDueno = [p.propietario, p.propietario_apellido].filter(Boolean).join(" ");
+                document.getElementById("mTxtPropietario").textContent = nombreDueno || "Sin tutor asignado";
+                document.getElementById("mTxtCedula").textContent = p.cedula || "—";
+                document.getElementById("mTxtTelefono").textContent = p.telefono || "—";
+                document.getElementById("mTxtDireccion").textContent = p.direccion || "—";
+
+                // Consulta y atención clínica
+                document.getElementById("mTxtTipoConsulta").textContent = p.tipo_servicio || "Consulta General";
+                document.getElementById("mTxtFechaConsulta").textContent = p.fecha_atencion ? Cairo.fmt.fecha(p.fecha_atencion) : (p.admision ? Cairo.fmt.fecha(p.admision) : "—");
+                document.getElementById("mTxtMotivoConsulta").textContent = p.motivo_consulta || "Sin motivo registrado";
+                document.getElementById("mTxtHistoria").textContent = p.historia || p.motivo_consulta || "Sin historia registrada";
+                document.getElementById("mTxtHallazgos").textContent = p.hallazgos || p.palpacion_abdominal || "Sin hallazgos registrados";
+
+                // Diagnóstico
+                if (p.diagnostico) {
+                    document.getElementById("mTxtDiagnostico").textContent = p.diagnostico;
+                    document.getElementById("mBoxDiagnostico").classList.remove("d-none");
+                } else {
+                    document.getElementById("mBoxDiagnostico").classList.add("d-none");
+                }
+
+                // Signos vitales
+                document.getElementById("mTxtTemperatura").textContent = p.temperatura ? `${p.temperatura} °C` : "—";
+                document.getElementById("mTxtCardiaca").textContent = p.frecuencia_cardiaca ? `${p.frecuencia_cardiaca} lpm` : "—";
+                document.getElementById("mTxtRespiratoria").textContent = p.frecuencia_respiratoria ? `${p.frecuencia_respiratoria} rpm` : "—";
+                document.getElementById("mTxtPesoSV").textContent = p.peso ? `${p.peso} kg` : "—";
+
+                // Examen físico
+                document.getElementById("mTxtHidratacion").textContent = p.hidratacion || "—";
+                document.getElementById("mTxtMucosa").textContent = p.mucosa || "—";
+                document.getElementById("mTxtPalpacion").textContent = p.palpacion_abdominal || "—";
+
+                // Observaciones
+                if (p.observaciones) {
+                    document.getElementById("mTxtObservaciones").textContent = p.observaciones;
+                    document.getElementById("mBoxObservaciones").classList.remove("d-none");
+                } else {
+                    document.getElementById("mBoxObservaciones").classList.add("d-none");
+                }
+
+                // Tratamiento e Indicaciones Médicas
+                const textoIndicaciones = p.indicaciones || p.tratamiento || "Sin indicaciones adicionales registradas.";
+                document.getElementById("mTxtIndicaciones").textContent = textoIndicaciones;
+
+                // Fármacos
+                const farmacos = p.farmacos || [];
+                const contFarmacos = document.getElementById("mContenedorTablaFarmacos");
+                const bodyFarmacos = document.getElementById("mBodyFarmacos");
+
+                if (farmacos.length > 0) {
+                    bodyFarmacos.innerHTML = farmacos.map(f => `
+                        <tr>
+                            <td class="fw-bold">${Cairo.esc(f.medicamento)}</td>
+                            <td>${Cairo.esc(f.dosis || "—")}</td>
+                            <td>${Cairo.esc(f.via || "Oral")}</td>
+                            <td>${Cairo.esc(f.cantidad || "—")}</td>
+                            <td>${Cairo.esc(f.proxima_cita ? Cairo.fmt.fecha(f.proxima_cita) : "—")}</td>
+                        </tr>
+                    `).join("");
+                    contFarmacos.classList.remove("d-none");
+                } else {
+                    contFarmacos.classList.add("d-none");
+                }
+
+                // Enlace a la vista cronológica completa
+                document.getElementById("mBtnVerTimelineCompleto").href = `historia_medica.html?id=${p.id}`;
+
+                modalExpediente.show();
+            }
+
+            function prepararFichaOficio() {
+                const pacienteId = modalEl.dataset.pacienteId;
+                const p = listaHistorias.find(item => Number(item.id) === Number(pacienteId));
+                if (!p) {
+                    Cairo.toast("No se encontró el expediente para exportar.", "error");
+                    return false;
+                }
+                const textoDisponible = (...valores) =>
+                    valores.map((valor) => String(valor ?? "").trim()).find(Boolean) || "";
+
+                const valores = {
+                    fNumeroFolio: p.numero_folio || p.codigo || `PAC-${p.id}`,
+                    fPropietario: p.propietario || "—",
+                    fApellido: p.propietario_apellido || "—",
+                    fCedula: p.cedula || "—",
+                    fDireccion: p.direccion || "—",
+                    fTelefono: p.telefono || "—",
+                    fCorreo: p.correo || "—",
+                    fFechaAdmision: (p.fecha_admision || p.fecha_atencion || p.admision)
+                        ? Cairo.fmt.fecha(p.fecha_admision || p.fecha_atencion || p.admision) : "—",
+                    fNombre: p.nombre || "—",
+                    fEspecie: p.especie || "—",
+                    fRaza: p.raza || "—",
+                    fSexo: p.genero || "—",
+                    fEdad: p.edad || "—",
+                    fAlimentacion: p.alimentacion || "—",
+                    fNacimiento: p.fecha_nac ? Cairo.fmt.fecha(p.fecha_nac) : "—",
+                    fTemperatura: p.temperatura ? `${p.temperatura} °C` : "—",
+                    fPeso: p.peso ? `${p.peso} kg` : "—",
+                    fRespiracion: p.frecuencia_respiratoria ? `${p.frecuencia_respiratoria} rpm` : "—",
+                    fHidratacion: p.hidratacion || "—",
+                    fHistoria: textoDisponible(p.historia, p.motivo_consulta),
+                    fHallazgos: textoDisponible(p.hallazgos, p.palpacion_abdominal, p.observaciones)
+                };
+                Object.entries(valores).forEach(([id, value]) => {
+                    document.getElementById(id).textContent = value;
+                });
+
+                const foto = document.getElementById("fFotoPaciente");
+                const fotoSrc = p.foto_url || (p.avatar_data
+                    ? CairoAvatar.dataUrl(p.avatar_data, p.especie || "Gato")
+                    : null);
+                if (fotoSrc) {
+                    foto.src = fotoSrc;
+                    foto.classList.remove("d-none");
+                } else {
+                    foto.removeAttribute("src");
+                    foto.classList.add("d-none");
+                }
+                return true;
+            }
+
+            // Evento al hacer clic en cualquier fila o botón
+            tbody.addEventListener("click", function (e) {
+                const tr = e.target.closest("tr[data-paciente-id]");
+                if (!tr) return;
+                const pid = tr.dataset.pacienteId;
+                modalEl.dataset.pacienteId = pid;
+                abrirModalExpediente(pid);
+            });
+            btnExportarFicha.addEventListener("click", function () {
+                if (!prepararFichaOficio()) return;
+                const foto = document.getElementById("fFotoPaciente");
+                const imprimir = () => window.print();
+                if (foto.classList.contains("d-none")) {
+                    imprimir();
+                    return;
+                }
+                foto.decode().then(imprimir, error => {
+                    console.error("No se pudo cargar la foto o avatar del paciente para imprimir:", error);
+                    Cairo.toast("No se pudo cargar la foto o avatar del paciente para imprimir.", "error");
+                });
+            });
+
+            // Buscador
+            let debounceTimer;
+            inputBusqueda.addEventListener("input", function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(cargarHistorias, 280);
+            });
+            filtroEspecie.addEventListener("change", renderizarTabla);
+            btnBuscar.addEventListener("click", cargarHistorias);
+
+            // Inicialización al estar listo el sistema CAIRO
+            Cairo.ready.then(() => {
+                const btnExcel = document.getElementById("btnExportarExcel");
+                if (btnExcel) {
+                    btnExcel.addEventListener("click", function () {
+                        const cabecera = ["Código", "Paciente", "Especie", "Raza", "Género", "Edad", "Peso", "Alimentación", "Propietario", "Cédula", "Teléfono", "Fecha Consulta", "Motivo", "Historia", "Hallazgos"];
+                        const filas = historiasVisibles().map(p => [
+                            p.codigo || `PAC-${p.id}`,
+                            p.nombre,
+                            p.especie,
+                            p.raza || "—",
+                            p.genero || p.sexo || "—",
+                            p.edad || "—",
+                            p.peso ? `${p.peso} kg` : "—",
+                            p.alimentacion || "—",
+                            [p.propietario, p.propietario_apellido].filter(Boolean).join(" "),
+                            p.cedula || "—",
+                            p.telefono || "—",
+                            p.fecha_atencion || p.admision || "—",
+                            p.motivo_consulta || "—",
+                            p.historia || p.motivo_consulta || "—",
+                            p.hallazgos || p.palpacion_abdominal || "—"
+                        ]);
+                        Cairo.exportExcel("historias_medicas_cairo.xls", cabecera, filas);
+                    });
+                }
+                cargarHistorias();
+            }).catch(err => {
+                console.error("Error al inicializar:", err);
+                Cairo.toast("Error al inicializar: " + err.message, "error");
+            });
+
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propietarios y Tutores · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+    <style>
+        :root {
+            --cairo-vanilla: #F3EABF;
+            --cairo-vanilla-soft: #FAF4D3;
+            --cairo-vanilla-border: #E8DC9E;
+            --cairo-text: #1A1A1A;
+            --cairo-primary: #C98B27;
+        }
+
+        body {
+            background-color: #F8F9FA;
+            color: var(--cairo-text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Barra de búsqueda dual estilo OkVet */
+        .search-panel-box {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 22px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .search-field-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #4A5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .search-input {
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-size: 0.92rem;
+            color: var(--cairo-text);
+            background-color: #FFFFFF;
+            transition: all 0.15s ease;
+        }
+
+        .search-input:focus {
+            border-color: #C98B27;
+            box-shadow: 0 0 0 3px rgba(201, 139, 39, 0.15);
+            outline: 0;
+        }
+
+        .btn-search-cairo {
+            background-color: var(--cairo-vanilla-soft);
+            border: 1px solid var(--cairo-vanilla-border);
+            color: #2D2409;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 9px 20px;
+            font-size: 0.92rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-search-cairo:hover {
+            background-color: var(--cairo-vanilla);
+            color: #000;
+        }
+
+        /* Tabla estilizada */
+        .tabla-propietarios th {
+            background-color: #F8FAFC;
+            font-size: 0.80rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 0.4px;
+            border-bottom: 2px solid #E2E8F0;
+            padding: 12px 14px;
+        }
+
+        .tabla-propietarios td {
+            vertical-align: middle;
+            padding: 14px;
+            font-size: 0.92rem;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        /* Avatar de iniciales del propietario */
+        .owner-initials-badge {
+            width: 44px;
+            min-width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: #FFFFFF;
+            background-color: #C98B27;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Item de mascota dentro de la celda */
+        .pet-item-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 4px 10px 4px 4px;
+            margin: 2px 4px 2px 0;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            color: var(--cairo-text);
+        }
+
+        .pet-item-chip:hover {
+            background: var(--cairo-vanilla-soft);
+            border-color: var(--cairo-vanilla-border);
+            color: #000;
+            transform: translateY(-1px);
+        }
+
+        .pet-thumb-mini {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            border: 1px solid #CBD5E1;
+        }
+
+        .pet-thumb-mini img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .pet-thumb-mini svg {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+        }
+
+        .btn-action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E1;
+            background: #FFFFFF;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #475569;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin-left: 3px;
+        }
+
+        .btn-action-icon:hover {
+            background-color: var(--cairo-vanilla-soft);
+            border-color: var(--cairo-vanilla-border);
+            color: #000;
+        }
+
+        .btn-action-icon.peligro:hover {
+            background-color: #FEE2E2;
+            border-color: #FCA5A5;
+            color: #DC2626;
+        }
+    </style>
+</head>
+
+<body data-active="propietarios" data-title="Propietarios y Tutores" data-crumb="Propietarios">
+
+    <template id="acciones">
+        <button class="btn btn-soft" id="btnExcel">Exportar Excel</button>
+        <a href="formulario_paciente.html" class="btn cairo-btn">+ Registrar propietario</a>
+    </template>
+
+    <main id="contenido">
+        <div class="container-fluid px-0 px-md-2" style="max-width: 1220px;">
+
+            <!-- BARRA DE BÚSQUEDA DUAL -->
+            <div class="search-panel-box">
+                <div class="row g-3 align-items-end">
+                    
+                    <!-- Búsqueda por Propietario -->
+                    <div class="col-md-5">
+                        <label class="search-field-label" for="qPropietario">
+                            Propietario
+                        </label>
+                        <input type="text" id="qPropietario" class="form-control search-input" placeholder="Buscar por identificación, teléfono o nombre del propietario">
+                    </div>
+
+                    <!-- Búsqueda por Mascota -->
+                    <div class="col-md-5">
+                        <label class="search-field-label" for="qMascota">
+                            Mascota
+                        </label>
+                        <input type="text" id="qMascota" class="form-control search-input" placeholder="Buscar por nombre o identificador de la mascota">
+                    </div>
+
+                    <!-- Botón Buscar -->
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-search-cairo w-100 justify-content-center" id="btnBuscar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            Buscar
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TABLA DE PROPIETARIOS Y MASCOTAS -->
+            <div class="cairo-card p-0 shadow-sm border rounded-3 overflow-hidden bg-white mb-5">
+                <div class="table-responsive">
+                    <table class="table tabla-propietarios mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Nombre</th>
+                                <th style="width: 13%;">Cédula</th>
+                                <th style="width: 14%;">Teléfono</th>
+                                <th style="width: 26%;">Mascotas</th>
+                                <th style="width: 12%;">Fecha de ingreso</th>
+                                <th style="width: 10%; text-align: right;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyPropietarios">
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">Cargando propietarios y mascotas…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Scripts Bootstrap, Cairo y Avatar -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/avatar.js"></script>
+
+    <script>
+        (function () {
+            "use strict";
+
+            const tbody = document.getElementById("tbodyPropietarios");
+            const qProp = document.getElementById("qPropietario");
+            const qMasc = document.getElementById("qMascota");
+            const btnBuscar = document.getElementById("btnBuscar");
+            let listaPropietarios = [];
+
+            // Colores atractivos para las iniciales del propietario
+            const coloresAvatar = [
+                "#C98B27", "#3B82F6", "#10B981", "#8B5CF6", "#EC4899", "#F59E0B", "#06B6D4", "#64748B"
+            ];
+
+            function obtenerColorIniciales(texto) {
+                let hash = 0;
+                for (let i = 0; i < texto.length; i++) {
+                    hash = texto.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const index = Math.abs(hash) % coloresAvatar.length;
+                return coloresAvatar[index];
+            }
+
+            function obtenerIniciales(nombre, apellido) {
+                const n = (nombre || "").trim()[0] || "";
+                const a = (apellido || "").trim()[0] || "";
+                return (n + a).toUpperCase() || "P";
+            }
+
+            async function cargarPropietarios() {
+                const params = new URLSearchParams();
+                const pVal = qProp.value.trim();
+                const mVal = qMasc.value.trim();
+
+                if (pVal) params.set("q_propietario", pVal);
+                if (mVal) params.set("q_mascota", mVal);
+
+                try {
+                    listaPropietarios = await Cairo.api("/propietarios?" + params.toString());
+                    renderizarTabla();
+                } catch (err) {
+                    Cairo.toast("Error al cargar propietarios: " + err.message, "error");
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger py-4">Error al cargar datos: ${Cairo.esc(err.message)}</td></tr>`;
+                }
+            }
+
+            function renderizarTabla() {
+                if (!listaPropietarios.length) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No se encontraron registros de propietarios o mascotas.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = listaPropietarios.map(o => {
+                    const iniciales = obtenerIniciales(o.nombre, o.apellido);
+                    const colorFondo = obtenerColorIniciales(o.nombre + (o.apellido || ""));
+                    const nombreCompleto = [o.nombre, o.apellido].filter(Boolean).join(" ");
+                    const correo = o.correo ? Cairo.esc(o.correo) : "Sin correo electrónico";
+
+                    // Mascotas del propietario (con respaldo si vinieron por lista o texto agrupado)
+                    let mascotas = Array.isArray(o.mascotas_lista) ? [...o.mascotas_lista] : [];
+                    if (mascotas.length === 0 && o.nombres_mascotas) {
+                        const nombres = o.nombres_mascotas.split(",").map(s => s.trim()).filter(Boolean);
+                        mascotas = nombres.map(nom => ({
+                            id: o.primera_mascota_id || null,
+                            nombre: nom,
+                            especie: "",
+                            genero: "",
+                            sexo: "",
+                            foto_url: null,
+                            avatar_data: null,
+                            admision: o.primera_admision || o.creado_en
+                        }));
+                    }
+
+                    let mascotasHtml = "";
+                    let fechaIngreso = "—";
+
+                    if (mascotas.length > 0) {
+                        // Fecha de ingreso de la primera mascota o más reciente
+                        const adm = mascotas[0].admision || o.primera_admision || o.creado_en;
+                        if (adm) {
+                            fechaIngreso = Cairo.fmt.fecha(adm);
+                        }
+
+                        mascotasHtml = mascotas.map(m => {
+                            let thumb = `<span class="fw-bold text-muted" style="font-size: 0.72rem;">${Cairo.esc((m.nombre || "M").charAt(0).toUpperCase())}</span>`;
+                            if (m.foto_url) {
+                                thumb = `<img src="${Cairo.esc(m.foto_url)}" alt="${Cairo.esc(m.nombre)}">`;
+                            } else if (m.avatar_data) {
+                                thumb = CairoAvatar.svg(m.avatar_data, m.especie || "Gato");
+                            }
+
+                            const linkHref = m.id ? `historia_medica.html?id=${m.id}` : "#";
+                            const detalleExtra = [m.especie, m.genero || m.sexo].filter(Boolean).join(" · ");
+                            const extraSpan = detalleExtra ? `<small class="text-muted" style="font-size: 0.72rem;">(${Cairo.esc(detalleExtra)})</small>` : "";
+
+                            return `
+                                <a href="${linkHref}" class="pet-item-chip" title="Ver historial clínico de ${Cairo.esc(m.nombre)}">
+                                    <span class="pet-thumb-mini">${thumb}</span>
+                                    <span class="fw-bold">${Cairo.esc(m.nombre)}</span>
+                                    ${extraSpan}
+                                </a>
+                            `;
+                        }).join("");
+                    } else {
+                        mascotasHtml = `<span class="text-muted small">Sin mascotas asignadas</span>`;
+                    }
+
+                    // Acciones: Ver historial de la primera mascota o registrar
+                    const primeraMascota = mascotas[0];
+                    const botonHistorial = (primeraMascota && primeraMascota.id)
+                        ? `<a href="historia_medica.html?id=${primeraMascota.id}" class="btn-action-icon" title="Ver historial clínico de ${Cairo.esc(primeraMascota.nombre)}">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"></path>
+                              <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"></path>
+                              <circle cx="20" cy="10" r="2"></circle>
+                            </svg>
+                          </a>`
+                        : `<a href="formulario_paciente.html" class="btn-action-icon" title="Registrar mascota">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="12" y1="5" x2="12" y2="19"></line>
+                              <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                          </a>`;
+
+                    return `
+                        <tr>
+                            <!-- 1. Nombre y debajo correo electrónico -->
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="owner-initials-badge" style="background-color: ${colorFondo};">
+                                        ${iniciales}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark mb-0">${Cairo.esc(nombreCompleto)}</div>
+                                        <div class="text-muted small" style="font-size: 0.80rem;">${correo}</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- 2. Cédula -->
+                            <td>
+                                <span class="fw-semibold text-dark">${Cairo.esc(o.cedula || "—")}</span>
+                            </td>
+
+                            <!-- 3. Teléfono -->
+                            <td>
+                                <span class="text-dark">${Cairo.esc(o.telefono || "—")}</span>
+                            </td>
+
+                            <!-- 4. Mascotas y nombre de la mascota con enlace a historial -->
+                            <td>
+                                <div class="d-flex flex-wrap align-items-center">
+                                    ${mascotasHtml}
+                                </div>
+                            </td>
+
+                            <!-- 5. Fecha de ingreso -->
+                            <td>
+                                <span class="text-muted small">${fechaIngreso}</span>
+                            </td>
+
+                            <!-- 6. Acciones -->
+                            <td class="text-end text-nowrap">
+                                ${botonHistorial}
+                                <button type="button" class="btn-action-icon peligro" title="Eliminar propietario" data-del="${o.id}" data-nombre="${Cairo.esc(nombreCompleto)}" data-mascotas="${mascotas.length}">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join("");
+            }
+
+            // Eventos de búsqueda
+            btnBuscar.addEventListener("click", cargarPropietarios);
+
+            let debounceTimer;
+            function busquedaDebounce() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(cargarPropietarios, 280);
+            }
+
+            qProp.addEventListener("input", busquedaDebounce);
+            qMasc.addEventListener("input", busquedaDebounce);
+
+            // Eliminar propietario con confirmación
+            tbody.addEventListener("click", async function (e) {
+                const btn = e.target.closest("[data-del]");
+                if (!btn) return;
+
+                const nombre = btn.dataset.nombre;
+                const cant = Number(btn.dataset.mascotas || 0);
+                const aviso = cant > 0
+                    ? ` Sus ${cant} mascota(s) quedarán sin propietario asignado pero sus historiales clínicos se conservarán.`
+                    : "";
+
+                if (!confirm(`¿Deseas eliminar al propietario ${nombre}?${aviso}`)) return;
+
+                try {
+                    await Cairo.api("/propietarios/" + btn.dataset.del, { method: "DELETE" });
+                    Cairo.toast("Propietario eliminado");
+                    cargarPropietarios();
+                } catch (err) {
+                    Cairo.toast("Error al eliminar: " + err.message, "error");
+                }
+            });
+
+            // Exportar a Excel
+            Cairo.ready.then(() => {
+                document.getElementById("btnExcel").addEventListener("click", () => {
+                    const cabecera = ["Propietario", "Cédula", "Teléfono", "Correo", "Dirección", "Mascotas", "Cantidad de mascotas"];
+                    const filas = listaPropietarios.map(o => [
+                        [o.nombre, o.apellido].filter(Boolean).join(" "),
+                        o.cedula || "—",
+                        o.telefono || "—",
+                        o.correo || "—",
+                        o.direccion || "—",
+                        (o.mascotas_lista || []).map(m => m.nombre).join(", ") || o.nombres_mascotas || "—",
+                        (o.mascotas_lista || []).length
+                    ]);
+                    Cairo.exportExcel("propietarios_cairo.xls", cabecera, filas);
+                });
+
+                cargarPropietarios();
+            });
+
+        })();
+    </script>
+</body>
+
+</html>

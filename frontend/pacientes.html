@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Pacientes · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+</head>
+<body data-active="pacientes" data-title="Registro de Pacientes" data-crumb="Pacientes">
+
+    <template id="acciones">
+        <button class="btn btn-soft" id="btnExcel">Exportar Excel</button>
+        <a href="formulario_paciente.html" class="btn cairo-btn">＋ Nuevo paciente</a>
+    </template>
+    <main id="contenido">
+        <div class="row g-3 mb-4">
+            <div class="col-md-9"><input id="q" type="search" class="form-control" placeholder="Buscar por nombre, propietario, código o especie…"></div>
+            <div class="col-md-3">
+                <select id="especie" class="form-select" aria-label="Filtrar por especie">
+                    <option value="">Todas las especies</option><option>Gato</option><option>Perro</option><option>Otro</option>
+                </select>
+            </div>
+        </div>
+        <div class="cairo-card p-3 p-md-4">
+            <div class="table-responsive">
+                <table class="table tabla mb-0">
+                    <thead><tr><th></th><th>CÓDIGO</th><th>PACIENTE</th><th>ESPECIE / RAZA</th><th>PROPIETARIO</th><th>ADMISIÓN</th><th class="text-end">ACCIONES</th></tr></thead>
+                    <tbody id="tbody"><tr><td colspan="7" class="vacio">Cargando…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/avatar.js"></script>
+    <script>
+
+        let lista = [];
+        const tb = document.getElementById("tbody");
+        async function cargar() {
+            const p = new URLSearchParams({ q: q.value, especie: especie.value });
+            lista = await Cairo.api("/pacientes?" + p);
+            tb.innerHTML = lista.length ? lista.map(x => `
+                <tr>
+                    <td><a href="historias_medicas.html?id=${encodeURIComponent(x.id)}" class="text-decoration-none" title="Abrir historia médica">${x.foto_url ? `<div class="thumb"><img data-paciente-foto="${x.id}" src="${Cairo.esc(x.foto_url)}" alt="Foto de ${Cairo.esc(x.nombre)}"></div>`
+                        : x.avatar_data ? `<div class="thumb">${CairoAvatar.svg(x.avatar_data, x.especie)}</div>`
+                            : `<div class="thumb">${Cairo.esc(x.nombre[0].toUpperCase())}</div>`}</a></td>
+                    <td><span class="cod">${x.codigo}</span></td>
+                    <td class="fw-bold"><a href="historias_medicas.html?id=${encodeURIComponent(x.id)}" class="text-dark text-decoration-none hover-underline" title="Abrir historia médica">${Cairo.esc(x.nombre)}</a></td>
+                    <td>${Cairo.esc(x.especie)}${x.raza ? " · " + Cairo.esc(x.raza) : ""}${x.marcas ? `<small class="d-block text-muted">${Cairo.esc(x.marcas)}</small>` : ""}</td>
+                    <td>${Cairo.esc([x.propietario, x.propietario_apellido].filter(Boolean).join(" ") || "—")}</td>
+                    <td>${Cairo.fmt.fecha(x.admision)}</td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn-icon" title="Abrir expediente médico" href="historias_medicas.html?id=${encodeURIComponent(x.id)}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V8h4.5M8 12h8v1.5H8V12Zm0 3h8v1.5H8V15Zm0 3h5v1.5H8V18Z"/></svg></a>
+                        <a class="btn-icon" title="Ver historial cronológico" href="historia_medica.html?id=${encodeURIComponent(x.id)}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5C7 5 2.700 8.100 1 12c1.700 3.900 6 7 11 7s9.300-3.100 11-7c-1.700-3.900-6-7-11-7Zm0 11.500a4.500 4.500 0 1 1 0-9 4.500 4.500 0 0 1 0 9Zm0-7a2.500 2.500 0 1 0 0 5 2.500 2.500 0 0 0 0-5Z"/></svg></a>
+                        <a class="btn-icon" title="Editar" href="formulario_paciente.html?id=${x.id}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.250V21h3.750L17.810 9.940l-3.750-3.750L3 17.250ZM20.710 7.040a1 1 0 0 0 0-1.410l-2.340-2.340a1 1 0 0 0-1.410 0l-1.830 1.830 3.750 3.750 1.830-1.830Z"/></svg></a>
+                        <button class="btn-icon peligro" title="Eliminar" data-del="${x.id}" data-n="${Cairo.esc(x.nombre)}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12ZM19 4h-3.500l-1-1h-5l-1 1H5v2h14V4Z"/></svg></button>
+                    </td>
+                </tr>`).join("") : '<tr><td colspan="7" class="vacio">No hay pacientes que coincidan.</td></tr>';
+            tb.querySelectorAll("[data-paciente-foto]").forEach((image) => {
+                image.addEventListener("error", () => {
+                    const patient = lista.find((item) => String(item.id) === image.dataset.pacienteFoto);
+                    image.parentElement.innerHTML = patient?.avatar_data
+                        ? CairoAvatar.svg(patient.avatar_data, patient.especie)
+                        : Cairo.esc(patient?.nombre?.[0]?.toUpperCase() || "?");
+                }, { once: true });
+            });
+        }
+        tb.addEventListener("click", async (e) => {
+            const b = e.target.closest("[data-del]"); if (!b) return;
+            if (!confirm(`¿Eliminar a ${b.dataset.n} y toda su historia médica? Esta acción no se puede deshacer.`)) return;
+            try { await Cairo.api("/pacientes/" + b.dataset.del, { method: "DELETE" }); Cairo.toast("Paciente eliminado"); cargar(); }
+            catch (err) { Cairo.toast(err.message, "error"); }
+        });
+        let t; q.addEventListener("input", () => { clearTimeout(t); t = setTimeout(cargar, 250); });
+        especie.addEventListener("change", cargar);
+        Cairo.ready.then(() => {
+        document.getElementById("btnExcel").onclick = () => {
+            const cab = ["Código", "Paciente", "Especie", "Raza", "Género", "Propietario", "Teléfono", "Admisión"];
+            const filas = lista.map(x => [x.codigo, x.nombre, x.especie, x.raza, x.genero || x.sexo, [x.propietario, x.propietario_apellido].filter(Boolean).join(" "), x.telefono, x.admision]);
+            Cairo.exportExcel("pacientes_cairo.xls", cab, filas);
+        };
+            cargar().catch(e => Cairo.toast(e.message, "error"));
+        });
+    </script>
+</body>
+</html>

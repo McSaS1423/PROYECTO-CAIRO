@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Pacientes · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+    <style>
+        :root {
+            --cairo-vanilla: #F3EABF;
+            --cairo-vanilla-soft: #FAF4D3;
+            --cairo-vanilla-border: #E8DC9E;
+            --cairo-text: #1A1A1A;
+            --cairo-text-muted: #4A5568;
+            --cairo-primary: #C98B27;
+        }
+
+        body {
+            background-color: #F8F9FA;
+            color: var(--cairo-text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtítulos con fondo beige formal, sin bordes amarillos en la esquina */
+        .cairo-section-header {
+            background-color: var(--cairo-vanilla-soft);
+            border: 1px solid var(--cairo-vanilla-border);
+            border-radius: 8px;
+            padding: 10px 18px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            font-size: 0.94rem;
+            color: #2D2409;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cairo-card-block {
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 22px;
+            margin-bottom: 22px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: var(--cairo-text);
+            margin-bottom: 5px;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid #CBD5E1;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.92rem;
+            color: var(--cairo-text);
+            background-color: #FFFFFF;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #C98B27;
+            box-shadow: 0 0 0 3px rgba(201, 139, 39, 0.15);
+            outline: 0;
+        }
+
+        .input-group-text {
+            background-color: #F8FAFC;
+            border-color: #CBD5E1;
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: var(--cairo-text);
+        }
+
+        /* Componente de foto / avatar ampliado */
+        .photo-carne-wrapper {
+            width: 190px;
+            min-width: 190px;
+            height: 190px;
+            background-color: #FAF8F2;
+            border: 2px dashed var(--cairo-vanilla-border);
+            border-radius: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .photo-carne-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .photo-carne-svg {
+            width: 90%;
+            height: 90%;
+            display: none;
+        }
+
+        .photo-carne-placeholder {
+            text-align: center;
+            color: #718096;
+            padding: 10px;
+        }
+
+        .photo-carne-placeholder svg {
+            width: 44px;
+            height: 44px;
+            margin-bottom: 6px;
+            color: #A0AEC0;
+        }
+
+        .photo-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            width: 190px;
+            justify-content: center;
+        }
+
+        .btn-photo-action {
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E1;
+            background: #FFFFFF;
+            color: var(--cairo-text);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-photo-action:hover {
+            background-color: #F1F5F9;
+            border-color: #94A3B8;
+        }
+
+        .btn-photo-avatar {
+            background-color: var(--cairo-vanilla-soft);
+            border-color: var(--cairo-vanilla-border);
+            color: #382B09;
+        }
+
+        .btn-photo-avatar:hover {
+            background-color: var(--cairo-vanilla);
+        }
+
+        /* Opciones de tipo de atención */
+        .atencion-card {
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 12px 14px;
+            cursor: pointer;
+            background-color: #FFFFFF;
+            transition: all 0.15s ease;
+            user-select: none;
+            height: 100%;
+        }
+
+        .atencion-card:hover {
+            border-color: #CBD5E1;
+            background-color: #FAF8F2;
+        }
+
+        .atencion-card.selected {
+            border-color: var(--cairo-vanilla-border);
+            background-color: var(--cairo-vanilla-soft);
+        }
+
+        .atencion-card .form-check-input {
+            cursor: pointer;
+            width: 1.15em;
+            height: 1.15em;
+        }
+
+        .subpanel-atencion {
+            background-color: #FAF8F2;
+            border: 1px solid var(--cairo-vanilla-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 14px;
+            display: none;
+        }
+
+        /* Tabla de fármacos */
+        .tabla-farmacos th {
+            background-color: var(--cairo-vanilla-soft);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #2D2409;
+            border-bottom: 1px solid var(--cairo-vanilla-border);
+        }
+
+        .tabla-farmacos td {
+            vertical-align: middle;
+            padding: 6px;
+        }
+
+        .btn-guardar-formal {
+            background-color: var(--cairo-vanilla);
+            border: 1px solid var(--cairo-vanilla-border);
+            color: #241A0B;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 10px 26px;
+            font-size: 0.98rem;
+            transition: all 0.15s ease;
+        }
+
+        .btn-guardar-formal:hover {
+            background-color: #EEDB82;
+            color: #000;
+        }
+
+        /* Modal Avatar */
+        .avatar-paint-description {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: end;
+            max-width: 760px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .avatar-paint-panel {
+            scroll-margin-top: 1.25rem;
+            max-width: 1140px;
+            margin: 0 auto;
+        }
+
+        #vistaRegistroPaciente[hidden],
+        .avatar-paint-panel[hidden] {
+            display: none !important;
+        }
+
+        .avatar-paint-panel-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .avatar-paint-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .avatar-paint-main {
+            min-width: 0;
+        }
+
+        .avatar-paint-settings {
+            min-width: 0;
+            padding: 14px;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            background: #FFFFFF;
+        }
+
+        .avatar-paint-workspace {
+            display: grid;
+            grid-template-columns: 58px minmax(0, 1fr);
+            gap: 14px;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .avatar-paint-tools {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            align-items: stretch;
+            padding: 7px;
+            border: 1px solid #D9E1E8;
+            border-radius: 10px;
+            background: #F1F4F7;
+        }
+
+        .avatar-paint-tool {
+            width: 36px;
+            height: 36px;
+            align-self: center;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            color: #334155;
+        }
+
+        .avatar-paint-tool:hover,
+        .avatar-paint-tool.active {
+            border-color: #9BCBC8;
+            background: #E5F5F3;
+            color: #117F80;
+        }
+
+        .avatar-paint-tool svg {
+            width: 19px;
+            height: 19px;
+        }
+
+        .avatar-paint-color {
+            width: 36px;
+            height: 36px;
+            align-self: center;
+            padding: 3px;
+            cursor: pointer;
+        }
+
+        .avatar-paint-board {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            overflow: hidden;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            background-color: #fff;
+            background-image: linear-gradient(45deg,#F1F5F9 25%,transparent 25%),linear-gradient(-45deg,#F1F5F9 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#F1F5F9 75%),linear-gradient(-45deg,transparent 75%,#F1F5F9 75%);
+            background-size: 20px 20px;
+            background-position: 0 0,0 10px,10px -10px,-10px 0;
+            touch-action: none;
+        }
+
+        .avatar-paint-board canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .avatar-paint-board #avatarPaintCanvas {
+            cursor: crosshair;
+        }
+
+        .avatar-paint-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            max-width: 720px;
+            margin: 9px auto 0;
+        }
+
+        .avatar-paint-controls input[type="range"] {
+            width: 112px;
+        }
+
+        .avatar-paint-panel-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid #E2E8F0;
+        }
+
+        .avatar-paint-module-description {
+            max-width: 760px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        html[data-tema="oscuro"] .avatar-paint-tools {
+            background: #292D33;
+            border-color: #485054;
+        }
+
+        html[data-tema="oscuro"] .avatar-paint-settings {
+            background: var(--cairo-card);
+            border-color: var(--cairo-line);
+        }
+
+        html[data-tema="oscuro"] .avatar-paint-panel-footer {
+            border-color: var(--cairo-line);
+        }
+
+        html[data-tema="oscuro"] .avatar-paint-tool {
+            color: #E1E7E8;
+        }
+
+        html[data-tema="oscuro"] .avatar-paint-tool:hover,
+        html[data-tema="oscuro"] .avatar-paint-tool.active {
+            background: #263A3A;
+            border-color: #3B7674;
+            color: #75D0C6;
+        }
+
+        html[data-tema="oscuro"] .avatar-paint-board {
+            border-color: #59636B;
+        }
+
+        @media (max-width: 767.98px) {
+            .avatar-paint-layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .avatar-paint-workspace,
+            .avatar-paint-controls {
+                max-width: 560px;
+            }
+
+            .avatar-paint-panel-heading {
+                align-items: flex-start;
+            }
+        }
+
+        #videoCamara {
+            width: 100%;
+            max-height: 320px;
+            background: #000;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body data-active="pacientes" data-title="Registro de Pacientes" data-crumb="Pacientes › Registro">
+
+    <template id="acciones">
+        <a href="pacientes.html" class="btn btn-soft">← Volver a Pacientes</a>
+    </template>
+
+    <main id="contenido">
+        <div id="vistaRegistroPaciente" class="container-fluid px-0 px-md-2" style="max-width: 1140px;">
+
+            <form id="formRegistroPaciente" novalidate>
+                <input type="hidden" id="pacienteId" value="">
+                <input type="hidden" id="propietarioId" value="">
+                <input type="hidden" id="fotoBase64" value="">
+                <input type="hidden" id="avatarDataJson" value="">
+
+                <!-- DATOS DEL PACIENTE Y DATOS DEL PROPIETARIO -->
+                <div class="row g-4 mb-2">
+
+                    <!-- DATOS DEL PACIENTE -->
+                    <div class="col-lg-7">
+                        <div class="cairo-card-block h-100">
+                            <div class="cairo-section-header">
+                                Datos del Paciente
+                            </div>
+
+                            <div class="d-flex flex-column flex-sm-row gap-3 align-items-start mb-3">
+                                
+                                <!-- Foto o Avatar grande -->
+                                <div class="d-flex flex-column align-items-center">
+                                    <div class="photo-carne-wrapper" id="boxFotoCarne">
+                                        <img id="imgFotoCarne" class="photo-carne-img" alt="Foto">
+                                        <div id="svgFotoCarne" class="photo-carne-svg"></div>
+                                        <div id="placeholderFotoCarne" class="photo-carne-placeholder">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                                <polyline points="21 15 16 10 5 21"></polyline>
+                                            </svg>
+                                            <div class="fw-semibold small">Fotografía / Avatar</div>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="inputArchivoFoto" accept="image/*" class="d-none">
+
+                                    <div class="photo-actions">
+                                        <button type="button" class="btn-photo-action" id="btnSubirArchivo">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="17 8 12 3 7 8"></polyline>
+                                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                                            </svg>
+                                            Cargar foto
+                                        </button>
+                                        <button type="button" class="btn-photo-action" id="btnAbrirCamara">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                                <circle cx="12" cy="13" r="4"></circle>
+                                            </svg>
+                                            Cámara
+                                        </button>
+                                        <button type="button" class="btn-photo-action btn-photo-avatar" id="btnAbrirModalAvatar">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                                            </svg>
+                                            Crear avatar
+                                        </button>
+                                        <button type="button" class="btn-photo-action text-danger d-none" id="btnQuitarFoto">
+                                            Quitar foto
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Campos de la Mascota -->
+                                <div class="flex-grow-1 w-100">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="pacienteNombre">Nombre</label>
+                                        <input type="text" class="form-control form-control-lg fw-bold" id="pacienteNombre" required>
+                                    </div>
+                                    <div class="row g-2 mb-2">
+                                        <div class="col-6">
+                                            <label class="form-label" for="pacienteEspecie">Especie</label>
+                                            <select class="form-select" id="pacienteEspecie">
+                                                <option value="Gato" selected>Gato</option>
+                                                <option value="Perro">Perro</option>
+                                                <option value="Otro">Otro</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label" for="pacienteSexo">Género</label>
+                                            <select class="form-select" id="pacienteSexo">
+                                                <option value="Hembra">Hembra</option>
+                                                <option value="Macho">Macho</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <label class="form-label" for="pacienteRaza">Raza</label>
+                                            <input type="text" class="form-control" id="pacienteRaza" list="listaRazas">
+                                            <datalist id="listaRazas"></datalist>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-2">
+                                <div class="col-md-3 col-6">
+                                    <label class="form-label" for="pacienteEdad">Edad</label>
+                                    <input type="text" class="form-control" id="pacienteEdad">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <label class="form-label" for="pacienteFechaNacimiento">Fecha de nacimiento</label>
+                                    <input type="date" class="form-control" id="pacienteFechaNacimiento">
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <label class="form-label" for="pacientePeso">Peso actual</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.1" class="form-control" id="pacientePeso">
+                                        <span class="input-group-text">kg</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <label class="form-label" for="pacienteAlimentacion">Alimentación</label>
+                                    <input type="text" class="form-control" id="pacienteAlimentacion" list="listaAlimentacion">
+                                    <datalist id="listaAlimentacion">
+                                        <option value="Concentrado / Pienso"></option>
+                                        <option value="Comida casera"></option>
+                                        <option value="Mixta (Concentrado + Casera)"></option>
+                                        <option value="Dieta natural / BARF"></option>
+                                        <option value="Especial / Prescripción"></option>
+                                    </datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DATOS DEL PROPIETARIO -->
+                    <div class="col-lg-5">
+                        <div class="cairo-card-block h-100">
+                            <div class="cairo-section-header">
+                                Datos del Propietario
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" for="fechaConsulta">Fecha de consulta</label>
+                                <input type="date" class="form-control" id="fechaConsulta" required>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-7">
+                                    <label class="form-label" for="propietarioNombre">Propietario (Nombres)</label>
+                                    <input type="text" class="form-control" id="propietarioNombre" required>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label" for="propietarioApellido">Apellidos</label>
+                                    <input type="text" class="form-control" id="propietarioApellido">
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label" for="propietarioCedula">Cédula</label>
+                                    <input type="text" class="form-control" id="propietarioCedula">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label" for="propietarioTelefono">Teléfono</label>
+                                    <input type="tel" class="form-control" id="propietarioTelefono">
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-0">
+                                <div class="col-6">
+                                    <label class="form-label" for="propietarioCorreo">Correo electrónico</label>
+                                    <input type="email" class="form-control" id="propietarioCorreo">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label" for="propietarioDireccion">Dirección</label>
+                                    <input type="text" class="form-control" id="propietarioDireccion">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- MOTIVO DE CONSULTA -->
+                <div class="cairo-card-block">
+                    <div class="cairo-section-header">
+                        Motivo de consulta
+                    </div>
+                    <textarea class="form-control" id="motivoConsulta" rows="3"></textarea>
+                </div>
+
+                <div class="cairo-card-block">
+                    <div class="cairo-section-header">
+                        Historia médica y hallazgos
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="historiaClinica">Historia</label>
+                            <textarea class="form-control" id="historiaClinica" rows="4"
+                                placeholder="Antecedentes y evolución del paciente"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="hallazgosClinicos">Hallazgos</label>
+                            <textarea class="form-control" id="hallazgosClinicos" rows="4"
+                                placeholder="Hallazgos clínicos relevantes"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIPO DE ATENCIÓN -->
+                <div class="cairo-card-block">
+                    <div class="cairo-section-header">
+                        Tipo de atención
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <label class="atencion-card selected d-block" id="cardConsultaGeneral">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input class="form-check-input" type="checkbox" id="checkConsultaGeneral" checked>
+                                    <strong>Consulta General</strong>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="atencion-card d-block" id="cardVacunacion">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input class="form-check-input" type="checkbox" id="checkVacunacion">
+                                    <strong>Vacunación</strong>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="atencion-card d-block" id="cardDesparasitacion">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input class="form-check-input" type="checkbox" id="checkDesparasitacion">
+                                    <strong>Desparasitación</strong>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label class="atencion-card d-block" id="cardEsterilizacion">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input class="form-check-input" type="checkbox" id="checkEsterilizacion">
+                                    <strong>Esterilización / Castración</strong>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="estado-vacunacion-pendiente mt-3">
+                        <div class="row g-2">
+                            <div class="col-md-4 form-check">
+                                <input class="form-check-input" type="checkbox" id="checkNecesitaVacunacion">
+                                <label class="form-check-label fw-semibold" for="checkNecesitaVacunacion">Necesita vacunarse</label>
+                            </div>
+                            <div class="col-md-4 form-check">
+                                <input class="form-check-input" type="checkbox" id="checkNecesitaDesparasitacion">
+                                <label class="form-check-label fw-semibold" for="checkNecesitaDesparasitacion">Necesita desparasitarse</label>
+                            </div>
+                            <div class="col-md-4 form-check">
+                                <input class="form-check-input" type="checkbox" id="checkNecesitaEsterilizacion">
+                                <label class="form-check-label fw-semibold" for="checkNecesitaEsterilizacion">Necesita esterilizarse</label>
+                            </div>
+                        </div>
+                        <small class="d-block text-muted mt-2">Los pendientes se mostrarán en Estado de pacientes y se retirarán al registrar el procedimiento como realizado.</small>
+                    </div>
+
+                    <!-- Subpanel Vacunación -->
+                    <div class="subpanel-atencion" id="panelVacunacion">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label" for="vacFecha">Fecha de vacunación</label>
+                                <input type="date" class="form-control" id="vacFecha">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="vacTipo">Tipo de vacuna</label>
+                                <input type="text" class="form-control" id="vacTipo">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="vacProximaCita">Próxima cita</label>
+                                <input type="date" class="form-control" id="vacProximaCita">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subpanel Desparasitación -->
+                    <div class="subpanel-atencion" id="panelDesparasitacion">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label" for="despFecha">Fecha</label>
+                                <input type="date" class="form-control" id="despFecha">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="despTipo">Tipo</label>
+                                <select class="form-select" id="despTipo">
+                                    <option value="Interna">Interna</option>
+                                    <option value="Externa">Externa</option>
+                                    <option value="Mixta" selected>Mixta</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="despProducto">Desparasitante utilizado</label>
+                                <input type="text" class="form-control" id="despProducto">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="despProximaDosis">Próxima dosis</label>
+                                <input type="date" class="form-control" id="despProximaDosis">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subpanel Esterilización / Castración -->
+                    <div class="subpanel-atencion" id="panelEsterilizacion">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label" for="estTipoCirugia">Procedimiento</label>
+                                <select class="form-select" id="estTipoCirugia">
+                                    <option value="Esterilización">Esterilización</option>
+                                    <option value="Castración">Castración</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="estFechaCita">Fecha programada</label>
+                                <input type="date" class="form-control" id="estFechaCita">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- SIGNOS VITALES -->
+                <div class="cairo-card-block">
+                    <div class="cairo-section-header">
+                        Signos vitales
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label" for="signoTemperatura">Temperatura</label>
+                            <div class="input-group">
+                                <input type="number" step="0.1" class="form-control" id="signoTemperatura">
+                                <span class="input-group-text">°C</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="signoCardiaca">Frecuencia cardíaca</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="signoCardiaca">
+                                <span class="input-group-text">lpm</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="signoRespiratoria">Frecuencia respiratoria</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="signoRespiratoria">
+                                <span class="input-group-text">rpm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EXAMEN FÍSICO -->
+                <div class="cairo-card-block">
+                    <div class="cairo-section-header">
+                        Examen físico
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label" for="efHidratacion">Grado de hidratación</label>
+                            <select class="form-select" id="efHidratacion">
+                                <option value="Normal" selected>Normal</option>
+                                <option value="Deshidratación leve">Deshidratación leve</option>
+                                <option value="Deshidratación moderada">Deshidratación moderada</option>
+                                <option value="Deshidratación severa">Deshidratación severa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="efMucosa">Color de la mucosa</label>
+                            <input type="text" class="form-control" id="efMucosa" placeholder="Escribe el color de la mucosa">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="efEstadoGeneral">Estado general</label>
+                            <input type="text" class="form-control" id="efEstadoGeneral" placeholder="Describe el estado general">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="efPalpacionAbdominal">Palpación abdominal</label>
+                        <textarea class="form-control" id="efPalpacionAbdominal" rows="2"></textarea>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="efObservaciones">Observaciones</label>
+                            <textarea class="form-control" id="efObservaciones" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="efDiagnostico">Diagnóstico preliminar</label>
+                            <textarea class="form-control" id="efDiagnostico" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECETA Y MEDICAMENTOS / INDICACIONES -->
+                <div class="cairo-card-block">
+                    <div class="cairo-section-header">
+                        Receta y medicamentos / Indicaciones
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="recetaIndicaciones">Indicaciones médicas / Pasos a seguir</label>
+                        <textarea class="form-control" id="recetaIndicaciones" rows="4"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label mb-0">Fármacos</label>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnAgregarFarmaco">
+                            + Agregar fármaco
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table tabla-farmacos table-bordered mb-0" id="tablaFarmacos">
+                            <thead>
+                                <tr>
+                                    <th style="width: 28%;">Medicamento</th>
+                                    <th style="width: 18%;">Dosis</th>
+                                    <th style="width: 18%;">Vía de administración</th>
+                                    <th style="width: 14%;">Cantidad</th>
+                                    <th style="width: 16%;">Próxima cita</th>
+                                    <th style="width: 6%; text-align: center;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyFarmacos">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- BARRA DE GUARDAR -->
+                <div class="d-flex justify-content-between align-items-center p-3 bg-white border rounded-3 mb-5">
+                    <a href="pacientes.html" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-guardar-formal" id="btnGuardarRegistro">
+                        Guardar registro
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    <!-- Módulo de creación de avatar -->
+    <section class="cairo-card-block avatar-paint-panel mb-4" id="moduloAvatar" hidden aria-labelledby="avatarEditorTitle">
+        <div class="cairo-section-header avatar-paint-panel-heading">
+            <div>
+                <h2 class="h5 fw-bold mb-0" id="avatarEditorTitle">Crear avatar de mascota</h2>
+                <small class="text-muted">Un espacio de trabajo para diseñar, pintar y guardar la imagen del paciente.</small>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCancelarAvatar">Volver al registro</button>
+        </div>
+        <div class="p-3">
+                    <div class="avatar-paint-description avatar-paint-module-description mb-3">
+                        <div>
+                            <label class="form-label small fw-semibold mb-1" for="avatarDescripcion">Descripción</label>
+                            <input type="text" class="form-control" id="avatarDescripcion" placeholder="Ej.: perro blanco con manchas negras y ojos cafés">
+                        </div>
+                        <button type="button" class="btn btn-sm btn-soft" id="btnAplicarDescripcion">Aplicar</button>
+                    </div>
+
+                    <div class="avatar-paint-layout">
+                      <div class="avatar-paint-main">
+                    <div class="avatar-paint-workspace">
+                        <div class="avatar-paint-tools" role="toolbar" aria-label="Herramientas de dibujo">
+                            <button type="button" class="avatar-paint-tool active" id="btnPincelAvatar" aria-label="Pincel" aria-pressed="true" title="Pincel">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6 4 4M3 21l3.5-.8L20 6.7a2.1 2.1 0 0 0-3-3L3.8 17.5 3 21Z"/></svg>
+                            </button>
+                            <button type="button" class="avatar-paint-tool" id="btnBorradorAvatar" aria-label="Borrador" aria-pressed="false" title="Borrador">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4-4a2 2 0 0 1 0-3L13 4a2 2 0 0 1 3 0l5 5a2 2 0 0 1 0 3l-9 9H7Z"/><path d="m6 11 7 7"/></svg>
+                            </button>
+                            <input type="color" class="form-control form-control-color avatar-paint-color" id="avatarColorPincel" value="#F16C54" aria-label="Color del pincel">
+                        </div>
+                        <div class="avatar-paint-board" aria-label="Lienzo para pintar el avatar">
+                            <canvas id="avatarBaseCanvas" width="512" height="512" aria-hidden="true"></canvas>
+                            <canvas id="avatarPaintCanvas" width="512" height="512" aria-label="Dibuja sobre el avatar"></canvas>
+                        </div>
+                    </div>
+                    <div class="avatar-paint-controls">
+                        <label class="small d-flex align-items-center gap-2" for="avatarTamanoPincel">
+                            Tamaño <input type="range" id="avatarTamanoPincel" min="2" max="40" value="8">
+                        </label>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnDeshacerAvatar">Deshacer</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnLimpiarAvatar">Limpiar dibujo</button>
+                        </div>
+                    </div>
+                      </div>
+                      <div class="avatar-paint-settings">
+                    <details open>
+                        <summary class="small fw-semibold text-muted">Ajustes del avatar</summary>
+                        <div class="pt-3">
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label small mb-1" for="avatarEspecie">Especie</label>
+                                    <select class="form-select form-select-sm" id="avatarEspecie">
+                                        <option value="Gato" selected>Gato</option>
+                                        <option value="Perro">Perro</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small mb-1" for="avatarPatron">Patrón del pelaje</label>
+                                    <select class="form-select form-select-sm" id="avatarPatron">
+                                        <option value="none">Sin patrón</option>
+                                        <option value="spot" selected>Punteado</option>
+                                        <option value="mask">Máscara</option>
+                                        <option value="patches">Manchas grandes</option>
+                                        <option value="tabby">Atigrado (Gato)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small mb-1" for="avatarColorPelaje">Color del pelaje</label>
+                                    <input type="color" class="form-control form-control-sm form-control-color w-100" id="avatarColorPelaje" value="#D2B48C">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small mb-1" for="avatarColorSecundario">Color de manchas</label>
+                                    <input type="color" class="form-control form-control-sm form-control-color w-100" id="avatarColorSecundario" value="#FFF8DC">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small mb-1" for="avatarColorOjos">Color de ojos</label>
+                                    <input type="color" class="form-control form-control-sm form-control-color w-100" id="avatarColorOjos" value="#3CB371">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small mb-1" for="avatarColorCollar">Color del collar</label>
+                                    <input type="color" class="form-control form-control-sm form-control-color w-100" id="avatarColorCollar" value="#FF4500">
+                                </div>
+                            </div>
+                            <label class="form-check-label small fw-bold mb-2" for="avatarCollarVisible">
+                                <input class="form-check-input me-1" type="checkbox" id="avatarCollarVisible" checked> Lleva collar
+                            </label>
+                            <div class="border rounded p-2 small">
+                                <div class="fw-bold text-muted mb-1">Ubicación de manchas</div>
+                                <div class="row g-1">
+                                    <div class="col-6"><label><input type="checkbox" value="frente" class="avatar-spot-check"> Frente</label></div>
+                                    <div class="col-6"><label><input type="checkbox" value="mejillaIzquierda" class="avatar-spot-check"> Mejilla izq.</label></div>
+                                    <div class="col-6"><label><input type="checkbox" value="mejillaDerecha" class="avatar-spot-check"> Mejilla der.</label></div>
+                                    <div class="col-6"><label><input type="checkbox" value="sobreOjoIzquierdo" class="avatar-spot-check"> Sobre ojo izq.</label></div>
+                                    <div class="col-6"><label><input type="checkbox" value="sobreOjoDerecho" class="avatar-spot-check"> Sobre ojo der.</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                      </div>
+                    </div>
+                </div>
+                <div class="avatar-paint-panel-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCancelarAvatarCambios">Cancelar</button>
+                    <button type="button" class="btn btn-sm btn-guardar-formal" id="btnGuardarAvatarModal">Usar avatar</button>
+                </div>
+    </section>
+    </main>
+
+    <!-- MODAL CÁMARA WEB -->
+    <div class="modal fade" id="modalCamara" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header py-2 px-3 bg-light">
+                    <h5 class="modal-title fs-6 fw-bold text-dark mb-0">Capturar fotografía</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body text-center p-3">
+                    <video id="videoCamara" autoplay playsinline></video>
+                    <canvas id="canvasCamara" class="d-none"></canvas>
+                </div>
+                <div class="modal-footer py-2 px-3 justify-content-between">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-sm btn-guardar-formal" id="btnDispararCamara">Tomar foto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts Bootstrap, Cairo y Avatar -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/avatar.js"></script>
+    <script src="js/razas.js"></script>
+
+    <script>
+        (function () {
+            "use strict";
+
+            const form = document.getElementById("formRegistroPaciente");
+            const moduloAvatarEl = document.getElementById("moduloAvatar");
+            const vistaRegistroPaciente = document.getElementById("vistaRegistroPaciente");
+            const tituloRegistro = document.body.dataset.title || "Registro de Pacientes";
+            const migasRegistro = document.body.dataset.crumb || "Pacientes › Registro";
+            const btnGuardar = document.getElementById("btnGuardarRegistro");
+            const pacienteIdInput = document.getElementById("pacienteId");
+            const propietarioIdInput = document.getElementById("propietarioId");
+            const fotoBase64Input = document.getElementById("fotoBase64");
+            const avatarDataJsonInput = document.getElementById("avatarDataJson");
+
+            // Fecha por defecto: hoy
+            const hoy = new Date().toISOString().slice(0, 10);
+            document.getElementById("fechaConsulta").value = hoy;
+            document.getElementById("vacFecha").value = hoy;
+            document.getElementById("despFecha").value = hoy;
+
+            // Foto y Avatar
+            const boxFotoCarne = document.getElementById("boxFotoCarne");
+            const inputArchivoFoto = document.getElementById("inputArchivoFoto");
+            const imgFotoCarne = document.getElementById("imgFotoCarne");
+            const svgFotoCarne = document.getElementById("svgFotoCarne");
+            const placeholderFotoCarne = document.getElementById("placeholderFotoCarne");
+            const btnSubirArchivo = document.getElementById("btnSubirArchivo");
+            const btnAbrirCamara = document.getElementById("btnAbrirCamara");
+            const btnAbrirModalAvatar = document.getElementById("btnAbrirModalAvatar");
+            const btnQuitarFoto = document.getElementById("btnQuitarFoto");
+
+            // Editor de avatar integrado en el formulario
+            const btnCancelarAvatar = document.getElementById("btnCancelarAvatar");
+            const btnCancelarAvatarCambios = document.getElementById("btnCancelarAvatarCambios");
+            const avatarEspecie = document.getElementById("avatarEspecie");
+            const avatarPatron = document.getElementById("avatarPatron");
+            const avatarColorPelaje = document.getElementById("avatarColorPelaje");
+            const avatarColorSecundario = document.getElementById("avatarColorSecundario");
+            const avatarCollarVisible = document.getElementById("avatarCollarVisible");
+            const avatarColorCollar = document.getElementById("avatarColorCollar");
+            const avatarColorOjos = document.getElementById("avatarColorOjos");
+            const btnGuardarAvatarModal = document.getElementById("btnGuardarAvatarModal");
+            const avatarBaseCanvas = document.getElementById("avatarBaseCanvas");
+            const avatarPaintCanvas = document.getElementById("avatarPaintCanvas");
+            const avatarBaseContext = avatarBaseCanvas.getContext("2d");
+            const avatarPaintContext = avatarPaintCanvas.getContext("2d");
+            const avatarColorPincel = document.getElementById("avatarColorPincel");
+            const avatarTamanoPincel = document.getElementById("avatarTamanoPincel");
+            let herramientaAvatar = "pincel";
+            let dibujandoAvatar = false;
+            let puntoAnteriorAvatar = null;
+            let historialDibujoAvatar = [];
+            let versionRenderAvatar = 0;
+
+            // Modal Cámara
+            const modalCamaraEl = document.getElementById("modalCamara");
+            const modalCamara = new bootstrap.Modal(modalCamaraEl);
+            const videoCamara = document.getElementById("videoCamara");
+            const canvasCamara = document.getElementById("canvasCamara");
+            const btnDispararCamara = document.getElementById("btnDispararCamara");
+            let mediaStream = null;
+
+            // Tipos de atención
+            const checkConsulta = document.getElementById("checkConsultaGeneral");
+            const checkVacuna = document.getElementById("checkVacunacion");
+            const checkDesp = document.getElementById("checkDesparasitacion");
+            const checkEsteril = document.getElementById("checkEsterilizacion");
+
+            const cardConsulta = document.getElementById("cardConsultaGeneral");
+            const cardVacuna = document.getElementById("cardVacunacion");
+            const cardDesp = document.getElementById("cardDesparasitacion");
+            const cardEsteril = document.getElementById("cardEsterilizacion");
+
+            const panelVacuna = document.getElementById("panelVacunacion");
+            const panelDesp = document.getElementById("panelDesparasitacion");
+            const panelEsteril = document.getElementById("panelEsterilizacion");
+
+            // Fármacos
+            const tbodyFarmacos = document.getElementById("tbodyFarmacos");
+            const btnAgregarFarmaco = document.getElementById("btnAgregarFarmaco");
+
+            // Configuración actual del avatar
+            let configAvatar = CairoAvatar.normalize(null, "Gato");
+            let fuenteFotoAvatar = "";
+
+            function limpiarDibujoAvatar(guardarEnHistorial = false) {
+                if (guardarEnHistorial) guardarTrazoAvatar();
+                avatarPaintContext.clearRect(0, 0, avatarPaintCanvas.width, avatarPaintCanvas.height);
+            }
+
+            function guardarTrazoAvatar() {
+                historialDibujoAvatar.push(avatarPaintContext.getImageData(0, 0, avatarPaintCanvas.width, avatarPaintCanvas.height));
+                if (historialDibujoAvatar.length > 20) historialDibujoAvatar.shift();
+            }
+
+            function renderizarBaseAvatar(fuenteFoto = "") {
+                const version = ++versionRenderAvatar;
+                btnGuardarAvatarModal.disabled = true;
+                const imagen = new Image();
+                imagen.onload = function () {
+                    if (version !== versionRenderAvatar) return;
+                    avatarBaseContext.clearRect(0, 0, avatarBaseCanvas.width, avatarBaseCanvas.height);
+                    avatarBaseContext.fillStyle = "#FFFFFF";
+                    avatarBaseContext.fillRect(0, 0, avatarBaseCanvas.width, avatarBaseCanvas.height);
+                    if (fuenteFoto) {
+                        const escala = Math.min(avatarBaseCanvas.width / imagen.naturalWidth, avatarBaseCanvas.height / imagen.naturalHeight);
+                        const ancho = imagen.naturalWidth * escala;
+                        const alto = imagen.naturalHeight * escala;
+                        avatarBaseContext.drawImage(imagen, (avatarBaseCanvas.width - ancho) / 2, (avatarBaseCanvas.height - alto) / 2, ancho, alto);
+                    } else {
+                        avatarBaseContext.drawImage(imagen, 24, 24, 464, 464);
+                    }
+                    btnGuardarAvatarModal.disabled = false;
+                };
+                imagen.onerror = function () {
+                    if (version === versionRenderAvatar) {
+                        btnGuardarAvatarModal.disabled = false;
+                        Cairo.toast("No se pudo dibujar la vista previa del avatar.", "error");
+                    }
+                };
+                imagen.src = fuenteFoto || CairoAvatar.dataUrl(configAvatar, configAvatar.species);
+            }
+
+            function renderizarStageAvatar(fuenteFoto = "") {
+                const esp = avatarEspecie.value;
+                const spots = Array.from(document.querySelectorAll(".avatar-spot-check:checked")).map(c => c.value);
+                configAvatar = CairoAvatar.normalize({
+                    species: esp,
+                    bodyColor: avatarColorPelaje.value,
+                    patternColor: avatarColorSecundario.value,
+                    pattern: avatarPatron.value,
+                    eyeColor: avatarColorOjos.value,
+                    collarVisible: avatarCollarVisible.checked,
+                    collarColor: avatarColorCollar.value,
+                    spots: spots
+                }, esp);
+                renderizarBaseAvatar(fuenteFoto);
+            }
+
+            [avatarEspecie, avatarPatron, avatarColorPelaje, avatarColorSecundario, avatarCollarVisible, avatarColorCollar, avatarColorOjos].forEach(el => {
+                el.addEventListener("input", () => renderizarStageAvatar());
+                el.addEventListener("change", () => renderizarStageAvatar());
+            });
+            document.querySelectorAll(".avatar-spot-check").forEach(chk => {
+                chk.addEventListener("change", () => renderizarStageAvatar());
+            });
+
+            function actualizarControlesAvatar(config) {
+                const avatar = CairoAvatar.normalize(config, config && config.species);
+                avatarEspecie.value = avatar.species;
+                avatarPatron.value = avatar.pattern;
+                avatarColorPelaje.value = avatar.bodyColor;
+                avatarColorSecundario.value = avatar.patternColor;
+                avatarColorOjos.value = avatar.eyeColor;
+                avatarCollarVisible.checked = avatar.collarVisible;
+                avatarColorCollar.value = avatar.collarColor;
+                document.querySelectorAll(".avatar-spot-check").forEach(chk => {
+                    chk.checked = avatar.spots.includes(chk.value);
+                });
+            }
+
+            const COLORES_DESCRIPCION = [
+                ["blanco", "#FFFFFF"], ["blanca", "#FFFFFF"], ["blancos", "#FFFFFF"], ["blancas", "#FFFFFF"],
+                ["crema", "#FFF8DC"], ["cremas", "#FFF8DC"], ["beige", "#D2B48C"], ["beiges", "#D2B48C"],
+                ["dorado", "#E6AE39"], ["dorada", "#E6AE39"], ["dorados", "#E6AE39"], ["doradas", "#E6AE39"],
+                ["amarillo", "#E6C84F"], ["amarilla", "#E6C84F"], ["amarillos", "#E6C84F"], ["amarillas", "#E6C84F"],
+                ["naranja", "#E68A00"], ["naranjas", "#E68A00"],
+                ["rojizo", "#CD853F"], ["rojiza", "#CD853F"], ["rojizos", "#CD853F"], ["rojizas", "#CD853F"],
+                ["marron", "#8B4513"], ["marrones", "#8B4513"], ["cafe", "#8B4513"], ["cafes", "#8B4513"],
+                ["chocolate", "#5C4033"], ["chocolates", "#5C4033"],
+                ["rojo", "#D64045"], ["roja", "#D64045"], ["rojos", "#D64045"], ["rojas", "#D64045"],
+                ["negro", "#1A1A1A"], ["negra", "#1A1A1A"], ["negros", "#1A1A1A"], ["negras", "#1A1A1A"],
+                ["gris", "#A9A9A9"], ["grises", "#A9A9A9"],
+                ["azul", "#4386C6"], ["azules", "#4386C6"],
+                ["verde", "#3CB371"], ["verdes", "#3CB371"],
+                ["ambar", "#D99A24"],
+                ["rosado", "#F0A0A8"], ["rosada", "#F0A0A8"], ["rosados", "#F0A0A8"], ["rosadas", "#F0A0A8"],
+                ["rosa", "#F0A0A8"], ["rosas", "#F0A0A8"]
+            ];
+            const alternativasColor = [...new Set(COLORES_DESCRIPCION.map(([nombre]) => nombre))]
+                .sort((a, b) => b.length - a.length).join("|");
+            const expresionColor = new RegExp(`\\b(${alternativasColor})\\b`, "g");
+
+            function interpretarDescripcionAvatar() {
+                const descripcion = document.getElementById("avatarDescripcion").value
+                    .toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (!descripcion.trim()) {
+                    Cairo.toast("Escribe una descripción de la mascota.", "error");
+                    return;
+                }
+
+                if (/\b(perros?|perras?|perrit[oa]s?|cachorros?|caninos?|caninas?)\b/.test(descripcion)) avatarEspecie.value = "Perro";
+                else if (/\b(gatos?|gatas?|gatit[oa]s?|felinos?|felinas?)\b/.test(descripcion)) avatarEspecie.value = "Gato";
+
+                const coincidenciasColor = [...descripcion.matchAll(expresionColor)]
+                    .map(coincidencia => ({
+                        nombre: coincidencia[1],
+                        color: COLORES_DESCRIPCION.find(([nombre]) => nombre === coincidencia[1])[1],
+                        index: coincidencia.index
+                    }));
+                const ojos = descripcion.match(new RegExp(`\\b(?:ojos?|mirada)\\s+(?:de\\s+color\\s+)?(${alternativasColor})\\b`));
+                const colorOjos = ojos && COLORES_DESCRIPCION.find(([nombre]) => nombre === ojos[1]);
+                if (colorOjos) avatarColorOjos.value = colorOjos[1];
+
+                const inicioOjos = ojos ? descripcion.indexOf(ojos[1], descripcion.indexOf(ojos[0])) : -1;
+                const coloresPelaje = coincidenciasColor
+                    .filter(color => color.index !== inicioOjos)
+                    .filter((color, index, lista) => lista.findIndex(item => item.color === color.color) === index);
+                const colorPelaje = coloresPelaje[0];
+                if (colorPelaje) avatarColorPelaje.value = colorPelaje.color;
+                const colorSecundario = coloresPelaje.find(color => color !== colorPelaje);
+                if (colorSecundario) avatarColorSecundario.value = colorSecundario.color;
+
+                if (/\b(atigrad[oa]s?|rayad[oa]s?)\b/.test(descripcion)) avatarPatron.value = "tabby";
+                else if (/\b(manchas grandes|parches)\b/.test(descripcion)) avatarPatron.value = "patches";
+                else if (/\b(mascara)\b/.test(descripcion)) avatarPatron.value = "mask";
+                else if (colorSecundario && /\b(manchas?|pintas?)\b/.test(descripcion)) avatarPatron.value = "patches";
+                else if (/\b(manchas?|pintas?)\b/.test(descripcion)) avatarPatron.value = "spot";
+                else if (colorSecundario) avatarPatron.value = "patches";
+                else avatarPatron.value = "none";
+
+                avatarCollarVisible.checked = !/\b(sin collar|no lleva collar)\b/.test(descripcion);
+                const colorCollar = descripcion.match(new RegExp(`\\b(${alternativasColor})\\s+(?:en\\s+el\\s+)?collar\\b`));
+                const colorCollarConfig = colorCollar && COLORES_DESCRIPCION.find(([nombre]) => nombre === colorCollar[1]);
+                if (colorCollarConfig) avatarColorCollar.value = colorCollarConfig[1];
+
+                document.querySelectorAll(".avatar-spot-check").forEach(chk => {
+                    const nombreMancha = chk.value.replace(/([A-Z])/g, " $1").toLocaleLowerCase("es");
+                    chk.checked = descripcion.includes(nombreMancha);
+                });
+                historialDibujoAvatar = [];
+                limpiarDibujoAvatar();
+                renderizarStageAvatar();
+            }
+
+            document.getElementById("btnAplicarDescripcion").addEventListener("click", interpretarDescripcionAvatar);
+            document.getElementById("avatarDescripcion").addEventListener("keydown", event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    interpretarDescripcionAvatar();
+                }
+            });
+
+            function seleccionarHerramientaAvatar(herramienta) {
+                herramientaAvatar = herramienta;
+                document.getElementById("btnPincelAvatar").classList.toggle("active", herramienta === "pincel");
+                document.getElementById("btnBorradorAvatar").classList.toggle("active", herramienta === "borrador");
+                document.getElementById("btnPincelAvatar").setAttribute("aria-pressed", String(herramienta === "pincel"));
+                document.getElementById("btnBorradorAvatar").setAttribute("aria-pressed", String(herramienta === "borrador"));
+            }
+
+            document.getElementById("btnPincelAvatar").addEventListener("click", () => seleccionarHerramientaAvatar("pincel"));
+            document.getElementById("btnBorradorAvatar").addEventListener("click", () => seleccionarHerramientaAvatar("borrador"));
+            avatarColorPincel.addEventListener("input", () => seleccionarHerramientaAvatar("pincel"));
+            document.getElementById("btnDeshacerAvatar").addEventListener("click", () => {
+                const anterior = historialDibujoAvatar.pop();
+                if (anterior) avatarPaintContext.putImageData(anterior, 0, 0);
+            });
+            document.getElementById("btnLimpiarAvatar").addEventListener("click", () => limpiarDibujoAvatar(true));
+
+            function coordenadaLienzoAvatar(event) {
+                const limites = avatarPaintCanvas.getBoundingClientRect();
+                return {
+                    x: (event.clientX - limites.left) * avatarPaintCanvas.width / limites.width,
+                    y: (event.clientY - limites.top) * avatarPaintCanvas.height / limites.height,
+                };
+            }
+
+            avatarPaintCanvas.addEventListener("pointerdown", event => {
+                if (event.button !== 0 && event.pointerType === "mouse") return;
+                event.preventDefault();
+                guardarTrazoAvatar();
+                dibujandoAvatar = true;
+                puntoAnteriorAvatar = coordenadaLienzoAvatar(event);
+                const escala = avatarPaintCanvas.width / avatarPaintCanvas.getBoundingClientRect().width;
+                avatarPaintContext.save();
+                avatarPaintContext.globalCompositeOperation = herramientaAvatar === "borrador" ? "destination-out" : "source-over";
+                avatarPaintContext.fillStyle = avatarColorPincel.value;
+                avatarPaintContext.beginPath();
+                avatarPaintContext.arc(
+                    puntoAnteriorAvatar.x,
+                    puntoAnteriorAvatar.y,
+                    Number(avatarTamanoPincel.value) * escala / 2,
+                    0,
+                    Math.PI * 2
+                );
+                avatarPaintContext.fill();
+                avatarPaintContext.restore();
+                avatarPaintCanvas.setPointerCapture(event.pointerId);
+            });
+            avatarPaintCanvas.addEventListener("pointermove", event => {
+                if (!dibujandoAvatar || !puntoAnteriorAvatar) return;
+                const punto = coordenadaLienzoAvatar(event);
+                const escala = avatarPaintCanvas.width / avatarPaintCanvas.getBoundingClientRect().width;
+                avatarPaintContext.save();
+                avatarPaintContext.globalCompositeOperation = herramientaAvatar === "borrador" ? "destination-out" : "source-over";
+                avatarPaintContext.strokeStyle = avatarColorPincel.value;
+                avatarPaintContext.lineWidth = Number(avatarTamanoPincel.value) * escala;
+                avatarPaintContext.fillStyle = avatarColorPincel.value;
+                avatarPaintContext.lineCap = "round";
+                avatarPaintContext.lineJoin = "round";
+                avatarPaintContext.beginPath();
+                avatarPaintContext.arc(puntoAnteriorAvatar.x, puntoAnteriorAvatar.y, avatarPaintContext.lineWidth / 2, 0, Math.PI * 2);
+                avatarPaintContext.fill();
+                avatarPaintContext.beginPath();
+                avatarPaintContext.moveTo(puntoAnteriorAvatar.x, puntoAnteriorAvatar.y);
+                avatarPaintContext.lineTo(punto.x, punto.y);
+                avatarPaintContext.stroke();
+                avatarPaintContext.restore();
+                puntoAnteriorAvatar = punto;
+            });
+            function finalizarTrazoAvatar() {
+                dibujandoAvatar = false;
+                puntoAnteriorAvatar = null;
+            }
+            avatarPaintCanvas.addEventListener("pointerup", finalizarTrazoAvatar);
+            avatarPaintCanvas.addEventListener("pointercancel", finalizarTrazoAvatar);
+
+            btnAbrirModalAvatar.addEventListener("click", function () {
+                // Sincronizar especie elegida en el formulario
+                const esp = document.getElementById("pacienteEspecie").value;
+                if (avatarDataJsonInput.value) {
+                    actualizarControlesAvatar(CairoAvatar.normalize(avatarDataJsonInput.value, esp));
+                } else {
+                    actualizarControlesAvatar(CairoAvatar.normalize(null, esp));
+                }
+                historialDibujoAvatar = [];
+                limpiarDibujoAvatar();
+                seleccionarHerramientaAvatar("pincel");
+                document.getElementById("avatarDescripcion").value = "";
+                renderizarStageAvatar(fuenteFotoAvatar);
+                moduloAvatarEl.hidden = false;
+                vistaRegistroPaciente.hidden = true;
+                document.body.dataset.title = "Editor de avatar";
+                document.body.dataset.crumb = "Pacientes › Editor de avatar";
+                const tituloTopbar = document.querySelector(".topbar h1");
+                const migasTopbar = document.querySelector(".crumb b");
+                if (tituloTopbar) tituloTopbar.textContent = document.body.dataset.title;
+                if (migasTopbar) migasTopbar.textContent = document.body.dataset.crumb;
+                window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+            });
+
+            function cerrarEditorAvatar() {
+                moduloAvatarEl.hidden = true;
+                vistaRegistroPaciente.hidden = false;
+                document.body.dataset.title = tituloRegistro;
+                document.body.dataset.crumb = migasRegistro;
+                const tituloTopbar = document.querySelector(".topbar h1");
+                const migasTopbar = document.querySelector(".crumb b");
+                if (tituloTopbar) tituloTopbar.textContent = tituloRegistro;
+                if (migasTopbar) migasTopbar.textContent = migasRegistro;
+                window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+                btnAbrirModalAvatar.focus();
+            }
+
+            btnCancelarAvatar.addEventListener("click", cerrarEditorAvatar);
+            btnCancelarAvatarCambios.addEventListener("click", cerrarEditorAvatar);
+
+            btnGuardarAvatarModal.addEventListener("click", function () {
+                const lienzoFinal = document.createElement("canvas");
+                lienzoFinal.width = avatarBaseCanvas.width;
+                lienzoFinal.height = avatarBaseCanvas.height;
+                const contextoFinal = lienzoFinal.getContext("2d");
+                contextoFinal.drawImage(avatarBaseCanvas, 0, 0);
+                contextoFinal.drawImage(avatarPaintCanvas, 0, 0);
+                fotoBase64Input.value = lienzoFinal.toDataURL("image/jpeg", 0.9);
+                fuenteFotoAvatar = fotoBase64Input.value;
+                avatarDataJsonInput.value = JSON.stringify(configAvatar);
+                inputArchivoFoto.value = "";
+                imgFotoCarne.src = fotoBase64Input.value;
+                imgFotoCarne.style.display = "block";
+                svgFotoCarne.style.display = "none";
+                placeholderFotoCarne.style.display = "none";
+                btnQuitarFoto.classList.remove("d-none");
+                cerrarEditorAvatar();
+            });
+
+            // Manejo de atención interactiva
+            function actualizarPanelesAtencion() {
+                cardConsulta.classList.toggle("selected", checkConsulta.checked);
+                cardVacuna.classList.toggle("selected", checkVacuna.checked);
+                panelVacuna.style.display = checkVacuna.checked ? "block" : "none";
+                cardDesp.classList.toggle("selected", checkDesp.checked);
+                panelDesp.style.display = checkDesp.checked ? "block" : "none";
+                cardEsteril.classList.toggle("selected", checkEsteril.checked);
+                panelEsteril.style.display = checkEsteril.checked ? "block" : "none";
+            }
+
+            [checkConsulta, checkVacuna, checkDesp, checkEsteril].forEach(chk => {
+                chk.addEventListener("change", actualizarPanelesAtencion);
+            });
+
+            // Manejo de Fotos (Archivo / Cámara)
+            function setFotoPreview(dataUrl) {
+                fotoBase64Input.value = dataUrl;
+                fuenteFotoAvatar = dataUrl;
+                avatarDataJsonInput.value = "";
+                imgFotoCarne.src = dataUrl;
+                imgFotoCarne.style.display = "block";
+                svgFotoCarne.style.display = "none";
+                placeholderFotoCarne.style.display = "none";
+                btnQuitarFoto.classList.remove("d-none");
+            }
+
+            function clearFoto() {
+                fotoBase64Input.value = "";
+                fuenteFotoAvatar = "";
+                avatarDataJsonInput.value = "";
+                inputArchivoFoto.value = "";
+                imgFotoCarne.src = "";
+                imgFotoCarne.style.display = "none";
+                svgFotoCarne.innerHTML = "";
+                svgFotoCarne.style.display = "none";
+                placeholderFotoCarne.style.display = "block";
+                btnQuitarFoto.classList.add("d-none");
+            }
+
+            btnQuitarFoto.addEventListener("click", clearFoto);
+            btnSubirArchivo.addEventListener("click", () => inputArchivoFoto.click());
+
+            inputArchivoFoto.addEventListener("change", function (e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (ev) {
+                    setFotoPreview(ev.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Cámara Web
+            btnAbrirCamara.addEventListener("click", async function () {
+                modalCamara.show();
+                try {
+                    mediaStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 640 } },
+                        audio: false
+                    });
+                    videoCamara.srcObject = mediaStream;
+                } catch (err) {
+                    modalCamara.hide();
+                    Cairo.toast("No se pudo iniciar la cámara web.", "error");
+                }
+            });
+
+            modalCamaraEl.addEventListener("hidden.bs.modal", function () {
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(t => t.stop());
+                    mediaStream = null;
+                }
+            });
+
+            btnDispararCamara.addEventListener("click", function () {
+                if (!videoCamara.videoWidth) return;
+                canvasCamara.width = videoCamara.videoWidth;
+                canvasCamara.height = videoCamara.videoHeight;
+                const ctx = canvasCamara.getContext("2d");
+                ctx.drawImage(videoCamara, 0, 0);
+                const dataUrl = canvasCamara.toDataURL("image/jpeg", 0.85);
+                setFotoPreview(dataUrl);
+                modalCamara.hide();
+            });
+
+            // Fármacos
+            function agregarFilaFarmaco(f = {}) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><input type="text" class="form-control form-control-sm f-medicamento" value="${Cairo.esc(f.medicamento || "")}"></td>
+                    <td><input type="text" class="form-control form-control-sm f-dosis" value="${Cairo.esc(f.dosis || "")}"></td>
+                    <td>
+                        <select class="form-select form-select-sm f-via">
+                            <option value="Oral" ${f.via === "Oral" ? "selected" : ""}>Oral</option>
+                            <option value="Subcutánea" ${f.via === "Subcutánea" ? "selected" : ""}>Subcutánea</option>
+                            <option value="Intramuscular" ${f.via === "Intramuscular" ? "selected" : ""}>Intramuscular</option>
+                            <option value="Intravenosa" ${f.via === "Intravenosa" ? "selected" : ""}>Intravenosa</option>
+                            <option value="Tópica" ${f.via === "Tópica" ? "selected" : ""}>Tópica</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control form-control-sm f-cantidad" value="${Cairo.esc(f.cantidad || "")}"></td>
+                    <td><input type="date" class="form-control form-control-sm f-proxima" value="${Cairo.esc(f.proxima_cita || "")}"></td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 btn-del-farmaco" title="Eliminar fila">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                tr.querySelector(".btn-del-farmaco").addEventListener("click", () => tr.remove());
+                tbodyFarmacos.appendChild(tr);
+            }
+
+            btnAgregarFarmaco.addEventListener("click", () => agregarFilaFarmaco());
+
+            // Catálogo de razas
+            async function cargarRazasEspecie(especie) {
+                try {
+                    const razas = await Cairo.api(`/razas?especie=${encodeURIComponent(especie)}`);
+                    const dl = document.getElementById("listaRazas");
+                    dl.innerHTML = (razas || []).map(r => `<option value="${Cairo.esc(r.nombre)}"></option>`).join("");
+                } catch (_) {}
+            }
+            document.getElementById("pacienteEspecie").addEventListener("change", function () {
+                cargarRazasEspecie(this.value);
+            });
+
+            // Cargar datos si viene con ?id=...
+            const urlParams = new URLSearchParams(window.location.search);
+            const editarId = urlParams.get("id");
+
+            async function cargarDatosPaciente() {
+                if (!editarId) {
+                    agregarFilaFarmaco();
+                    return;
+                }
+                try {
+                    const p = await Cairo.api("/pacientes/" + encodeURIComponent(editarId));
+                    pacienteIdInput.value = p.id;
+                    propietarioIdInput.value = p.propietario_id || "";
+
+                    document.getElementById("propietarioNombre").value = p.propietario || "";
+                    document.getElementById("propietarioApellido").value = p.propietario_apellido || "";
+                    document.getElementById("propietarioCedula").value = p.cedula || "";
+                    document.getElementById("propietarioTelefono").value = p.telefono || "";
+                    document.getElementById("propietarioCorreo").value = p.correo || "";
+                    document.getElementById("propietarioDireccion").value = p.direccion || "";
+
+                    document.getElementById("pacienteNombre").value = p.nombre || "";
+                    document.getElementById("pacienteEspecie").value = p.especie || "Gato";
+                    document.getElementById("pacienteSexo").value = p.sexo || "Hembra";
+                    document.getElementById("pacienteRaza").value = p.raza || "";
+                    document.getElementById("pacienteEdad").value = p.edad || Cairo.fmt.edad(p.fecha_nac) || "";
+                    document.getElementById("pacienteFechaNacimiento").value = p.fecha_nac || "";
+                    document.getElementById("pacientePeso").value = p.peso || (p.historia && p.historia.peso) || "";
+                    document.getElementById("pacienteAlimentacion").value = p.alimentacion || (p.historia && p.historia.alimentacion) || "";
+                    document.getElementById("checkNecesitaVacunacion").checked = Boolean(p.necesita_vacunacion);
+                    document.getElementById("checkNecesitaDesparasitacion").checked = Boolean(p.necesita_desparasitacion);
+                    document.getElementById("checkNecesitaEsterilizacion").checked = Boolean(p.necesita_esterilizacion);
+
+                    if (p.avatar_data) avatarDataJsonInput.value = p.avatar_data;
+                    if (p.foto_url) {
+                        fuenteFotoAvatar = p.foto_url;
+                        imgFotoCarne.src = p.foto_url;
+                        imgFotoCarne.style.display = "block";
+                        svgFotoCarne.style.display = "none";
+                        placeholderFotoCarne.style.display = "none";
+                        btnQuitarFoto.classList.remove("d-none");
+                    } else if (p.avatar_data) {
+                        avatarDataJsonInput.value = p.avatar_data;
+                        svgFotoCarne.innerHTML = CairoAvatar.svg(p.avatar_data, p.especie);
+                        svgFotoCarne.style.display = "block";
+                        imgFotoCarne.style.display = "none";
+                        placeholderFotoCarne.style.display = "none";
+                        btnQuitarFoto.classList.remove("d-none");
+                    }
+
+                    if (p.historia) {
+                        document.getElementById("signoTemperatura").value = p.historia.temperatura || "";
+                        document.getElementById("signoRespiratoria").value = p.historia.respiracion || "";
+                        if (p.historia.hidratacion) document.getElementById("efHidratacion").value = p.historia.hidratacion;
+                        if (p.historia.diagnostico) document.getElementById("efDiagnostico").value = p.historia.diagnostico;
+                        document.getElementById("historiaClinica").value = p.historia.historia || "";
+                        document.getElementById("hallazgosClinicos").value = p.historia.hallazgos || "";
+                    }
+
+                    cargarRazasEspecie(p.especie || "Gato");
+                    agregarFilaFarmaco();
+                } catch (err) {
+                    agregarFilaFarmaco();
+                }
+            }
+
+            // Enviar formulario
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const nombre = document.getElementById("pacienteNombre").value.trim();
+                if (!nombre) {
+                    Cairo.toast("El nombre del paciente es obligatorio.", "error");
+                    document.getElementById("pacienteNombre").focus();
+                    return;
+                }
+
+                btnGuardar.disabled = true;
+                btnGuardar.textContent = "Guardando...";
+
+                try {
+                    const farmacos = [];
+                    tbodyFarmacos.querySelectorAll("tr").forEach(tr => {
+                        const m = tr.querySelector(".f-medicamento").value.trim();
+                        const d = tr.querySelector(".f-dosis").value.trim();
+                        const v = tr.querySelector(".f-via").value;
+                        const c = tr.querySelector(".f-cantidad").value.trim();
+                        const p = tr.querySelector(".f-proxima").value;
+                        if (m || d) farmacos.push({ medicamento: m, dosis: d, via: v, cantidad: c, proxima_cita: p });
+                    });
+
+                    const payload = {
+                        id: pacienteIdInput.value || null,
+                        propietario_id: propietarioIdInput.value || null,
+                        fecha_consulta: document.getElementById("fechaConsulta").value || hoy,
+
+                        propietario: document.getElementById("propietarioNombre").value.trim(),
+                        propietario_apellido: document.getElementById("propietarioApellido").value.trim(),
+                        cedula: document.getElementById("propietarioCedula").value.trim(),
+                        telefono: document.getElementById("propietarioTelefono").value.trim(),
+                        correo: document.getElementById("propietarioCorreo").value.trim(),
+                        direccion: document.getElementById("propietarioDireccion").value.trim(),
+
+                        nombre: nombre,
+                        especie: document.getElementById("pacienteEspecie").value,
+                        genero: document.getElementById("pacienteSexo").value,
+                        sexo: document.getElementById("pacienteSexo").value,
+                        raza: document.getElementById("pacienteRaza").value.trim(),
+                        edad: document.getElementById("pacienteEdad").value.trim(),
+                        fecha_nac: document.getElementById("pacienteFechaNacimiento").value,
+                        peso: document.getElementById("pacientePeso").value.trim(),
+                        alimentacion: document.getElementById("pacienteAlimentacion").value.trim(),
+                        necesita_vacunacion: document.getElementById("checkNecesitaVacunacion").checked,
+                        necesita_desparasitacion: document.getElementById("checkNecesitaDesparasitacion").checked,
+                        necesita_esterilizacion: document.getElementById("checkNecesitaEsterilizacion").checked,
+                        foto_base64: fotoBase64Input.value || null,
+                        avatar_data: avatarDataJsonInput.value || null,
+
+                        motivo_consulta: document.getElementById("motivoConsulta").value.trim(),
+                        historia: document.getElementById("historiaClinica").value.trim(),
+                        hallazgos: document.getElementById("hallazgosClinicos").value.trim(),
+
+                        tipos_atencion: {
+                            consulta_general: checkConsulta.checked,
+                            vacunacion: {
+                                activa: checkVacuna.checked,
+                                fecha_vacunacion: document.getElementById("vacFecha").value,
+                                tipo_vacuna: document.getElementById("vacTipo").value.trim(),
+                                proxima_cita: document.getElementById("vacProximaCita").value
+                            },
+                            desparasitacion: {
+                                activa: checkDesp.checked,
+                                fecha: document.getElementById("despFecha").value,
+                                tipo_interna_externa: document.getElementById("despTipo").value,
+                                producto: document.getElementById("despProducto").value.trim(),
+                                proxima_dosis: document.getElementById("despProximaDosis").value
+                            },
+                            esterilizacion: {
+                                activa: checkEsteril.checked,
+                                tipo_cirugia: document.getElementById("estTipoCirugia").value,
+                                fecha_cita: document.getElementById("estFechaCita").value
+                            }
+                        },
+
+                        signos_vitales: {
+                            temperatura: document.getElementById("signoTemperatura").value.trim(),
+                            frecuencia_cardiaca: document.getElementById("signoCardiaca").value.trim(),
+                            frecuencia_respiratoria: document.getElementById("signoRespiratoria").value.trim()
+                        },
+
+                        examen_fisico: {
+                            hidratacion: document.getElementById("efHidratacion").value,
+                            mucosa: document.getElementById("efMucosa").value.trim(),
+                            estado_general: document.getElementById("efEstadoGeneral").value.trim(),
+                            palpacion_abdominal: document.getElementById("efPalpacionAbdominal").value.trim(),
+                            observaciones: document.getElementById("efObservaciones").value.trim(),
+                            diagnostico: document.getElementById("efDiagnostico").value.trim()
+                        },
+
+                        receta: {
+                            indicaciones: document.getElementById("recetaIndicaciones").value.trim(),
+                            farmacos: farmacos
+                        }
+                    };
+
+                    const resp = await Cairo.api("/pacientes/registro-completo", {
+                        method: "POST",
+                        body: payload
+                    });
+
+                    Cairo.toast("Registro guardado con éxito.");
+                    setTimeout(() => {
+                        window.location.href = `historia_medica.html?id=${resp.id}`;
+                    }, 500);
+
+                } catch (err) {
+                    Cairo.toast("Error al guardar: " + err.message, "error");
+                    btnGuardar.disabled = false;
+                    btnGuardar.textContent = "Guardar registro";
+                }
+            });
+
+            Cairo.ready.then(() => {
+                cargarRazasEspecie("Gato");
+                cargarDatosPaciente();
+                actualizarPanelesAtencion();
+            });
+
+        })();
+    </script>
+</body>
+
+</html>

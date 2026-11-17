@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustes · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+    <style>
+        .respaldo-overlay{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:1rem;background:rgba(15,35,42,.48);backdrop-filter:blur(3px)}
+        .respaldo-overlay[hidden]{display:none}
+        .respaldo-dialog{display:grid;justify-items:center;gap:.8rem;min-width:min(100%,300px);padding:2rem;border:1px solid var(--cairo-line);border-radius:18px;background:var(--cairo-card);color:var(--cairo-text);box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center}
+        .respaldo-dialog .spinner-border{width:2.5rem;height:2.5rem;color:var(--cairo-interaction)}
+    </style>
+</head>
+<body data-active="ajustes" data-title="Ajustes" data-crumb="Personaliza el resumen">
+    <main id="contenido">
+        <section class="cairo-card p-3 p-md-4 mb-4" aria-labelledby="aparienciaTitulo">
+            <h2 class="h5 fw-bold mb-2" id="aparienciaTitulo">Apariencia</h2>
+            <p class="text-muted mb-3">Activa el modo nocturno para cambiar los colores del sistema.</p>
+            <button class="btn btn-soft" id="btnTemaAjustes" type="button" aria-pressed="false"></button>
+        </section>
+        <section class="cairo-card p-3 p-md-4 mb-4" id="gestionUsuarios" aria-labelledby="usuariosTitulo" hidden>
+            <h2 class="h5 fw-bold mb-2" id="usuariosTitulo">Gestión de usuarios</h2>
+            <p class="text-muted mb-3">Administra las cuentas y los accesos al sistema.</p>
+            <a class="btn btn-soft" href="modulos.html?modulo=usuarios">Abrir módulo de usuarios</a>
+        </section>
+        <section class="cairo-card p-3 p-md-4 mb-4" id="configuracionAforo" aria-labelledby="aforoTitulo" hidden>
+            <h2 class="h5 fw-bold mb-2" id="aforoTitulo">Control de aforo</h2>
+            <p class="text-muted">Define el máximo de citas que se pueden agendar por día. Los días que alcancen el límite quedarán deshabilitados en el calendario.</p>
+            <form id="formCapacidad" class="row g-3 align-items-end">
+                <div class="col-sm-6 col-md-4">
+                    <label class="form-label" for="capacidadDiaria">Límite máximo de citas por día</label>
+                    <input class="form-control" id="capacidadDiaria" type="number" min="1" step="1" required>
+                </div>
+                <div class="col-auto"><button class="btn cairo-btn" id="guardarCapacidad" type="submit">Guardar cambios</button></div>
+                <p class="small text-muted mb-0" id="estadoCapacidad" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+        <section class="cairo-card p-3 p-md-4 mb-4" id="configuracionHorario" aria-labelledby="horarioTitulo" hidden>
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                <div>
+                    <h2 class="h5 fw-bold mb-2" id="horarioTitulo">Horario de atención</h2>
+                    <p class="text-muted mb-0">Consulta y edita los días y las horas de atención. El horario inicial es lunes, miércoles y viernes, de 9:00 a. m. a 12:45 p. m.</p>
+                </div>
+                <button class="btn btn-soft horario-toolbar" id="exportarHorario" type="button">Exportar horario a PDF</button>
+            </div>
+            <form id="formHorario" class="horario-form">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-3">
+                        <thead><tr><th>Día</th><th>Atención</th><th>Desde</th><th>Hasta</th></tr></thead>
+                        <tbody id="filasHorario"></tbody>
+                    </table>
+                </div>
+                <button class="btn cairo-btn" id="guardarHorario" type="submit">Guardar horario</button>
+                <p class="small text-muted mt-2 mb-0" id="estadoHorario" role="status" aria-live="polite"></p>
+            </form>
+            <div class="horario-reporte" id="horarioReporte">
+                <header class="horario-reporte-cabecera">
+                    <img src="img/logo-cairo.svg" alt="Logo CAIRO">
+                    <div><strong>CAIRO</strong><span>Clínica &amp; Refugio</span></div>
+                </header>
+                <h3>Horario de atención</h3>
+                <p>Horario vigente de la Clínica &amp; Refugio CAIRO</p>
+                <table class="horario-reporte-tabla">
+                    <thead><tr><th>Día</th><th>Horario</th></tr></thead>
+                    <tbody id="resumenHorario"></tbody>
+                </table>
+            </div>
+        </section>
+        <section class="cairo-card p-3 p-md-4 mb-4" id="gestionRespaldo" aria-labelledby="respaldoTitulo" hidden>
+            <h2 class="h5 fw-bold mb-2" id="respaldoTitulo">Respaldo de datos</h2>
+            <p class="text-muted">Exporta todos los registros, fotos y archivos de CAIRO en un ZIP compatible con WinRAR. Al importar, el respaldo reemplazará los datos actuales del sistema.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn cairo-btn" id="exportarRespaldo" type="button">Exportar respaldo ZIP</button>
+                <button class="btn btn-soft" id="abrirImportacionRespaldo" type="button">Importar respaldo ZIP</button>
+                <input class="d-none" id="archivoRespaldo" type="file" accept=".zip,application/zip,application/x-zip-compressed">
+            </div>
+            <p class="small text-muted mt-3 mb-1" id="nombreArchivoRespaldo"></p>
+            <p class="small text-muted mb-0" id="estadoRespaldo" role="status" aria-live="polite"></p>
+        </section>
+        <section class="cairo-card p-3 p-md-4 mb-4">
+            <h2 class="h5 fw-bold mb-2">Resumen general</h2>
+            <p class="text-muted mb-0">Elige qué bloques se muestran en Inicio. Los cambios se guardan en este navegador y puedes volver a activarlos cuando quieras.</p>
+        </section>
+        <section class="cairo-card p-3 p-md-4" aria-labelledby="bloquesTitulo">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="h5 fw-bold mb-0" id="bloquesTitulo">Bloques del resumen</h2>
+                <button class="btn btn-soft" id="mostrarTodo" type="button">Mostrar todo</button>
+            </div>
+            <div class="list-group list-group-flush">
+                <label class="list-group-item d-flex align-items-center gap-3 py-3">
+                    <input class="form-check-input m-0 resumen-toggle" type="checkbox" data-bloque="bienvenida">
+                    <span><strong>Bienvenida</strong><small class="d-block text-muted">Saludo y banner de la clínica.</small></span>
+                </label>
+                <label class="list-group-item d-flex align-items-center gap-3 py-3">
+                    <input class="form-check-input m-0 resumen-toggle" type="checkbox" data-bloque="encabezado">
+                    <span><strong>Encabezado del resumen semanal</strong><small class="d-block text-muted">Indicador del período que cubren las métricas.</small></span>
+                </label>
+                <label class="list-group-item d-flex align-items-center gap-3 py-3">
+                    <input class="form-check-input m-0 resumen-toggle" type="checkbox" data-bloque="metricas">
+                    <span><strong>Tarjetas de métricas</strong><small class="d-block text-muted">Pacientes, propietarios y actividad clínica semanal.</small></span>
+                </label>
+                <label class="list-group-item d-flex align-items-center gap-3 py-3">
+                    <input class="form-check-input m-0 resumen-toggle" type="checkbox" data-bloque="grafico_mensual">
+                    <span><strong>Gráfico de actividad mensual</strong><small class="d-block text-muted">Atenciones y procedimientos registrados durante los últimos 12 meses.</small></span>
+                </label>
+                <label class="list-group-item d-flex align-items-center gap-3 py-3">
+                    <input class="form-check-input m-0 resumen-toggle" type="checkbox" data-bloque="agenda">
+                    <span><strong>Próximas citas</strong><small class="d-block text-muted">Agenda de citas programadas próximamente.</small></span>
+                </label>
+                <label class="list-group-item d-flex align-items-center gap-3 py-3">
+                    <input class="form-check-input m-0 resumen-toggle" type="checkbox" data-bloque="eventos">
+                    <span><strong>Próximos eventos y jornadas</strong><small class="d-block text-muted">Jornadas y eventos planificados.</small></span>
+                </label>
+                <label class="list-group-item d-flex align-items-center gap-3 py-3">
+                    <input class="form-check-input m-0 resumen-toggle" type="checkbox" data-bloque="stock">
+                    <span><strong>Control de stock</strong><small class="d-block text-muted">Alertas de productos agotados o con pocas unidades.</small></span>
+                </label>
+            </div>
+            <p class="small text-muted mt-3 mb-0" id="estadoAjustes" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+    <div class="respaldo-overlay" id="respaldoOverlay" hidden>
+        <div class="respaldo-dialog" role="status" aria-live="polite">
+            <span class="spinner-border" aria-hidden="true"></span>
+            <strong id="estadoProcesoRespaldo">Cargando archivos…</strong>
+            <span class="small text-muted">No cierres Cairo mientras se procesa el respaldo.</span>
+        </div>
+    </div>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        Cairo.ready.then((usuario) => {
+            const opciones = [...document.querySelectorAll(".resumen-toggle")];
+            const estado = document.getElementById("estadoAjustes");
+            const clavesActuales = new Set(opciones.map((opcion) => opcion.dataset.bloque));
+            const clavesObsoletas = ["actividad", "grafico", "resumen_actual", "paciente"];
+            try {
+                clavesObsoletas.forEach((clave) => {
+                    if (localStorage.getItem(`cairo-resumen-oculto-${clave}`) === "true"
+                        && !clavesActuales.has(clave)) {
+                        localStorage.removeItem(`cairo-resumen-oculto-${clave}`);
+                    }
+                });
+            } catch (_) {
+                estado.textContent = "No se pudieron actualizar los bloques guardados en este navegador.";
+            }
+            document.getElementById("gestionUsuarios").hidden =
+                ["Veterinario", "Asistente"].includes(usuario.rol);
+            if (usuario.rol === "Administrador") {
+                const seccionRespaldo = document.getElementById("gestionRespaldo");
+                const btnExportarRespaldo = document.getElementById("exportarRespaldo");
+                const btnAbrirImportacion = document.getElementById("abrirImportacionRespaldo");
+                const inputRespaldo = document.getElementById("archivoRespaldo");
+                const nombreArchivoRespaldo = document.getElementById("nombreArchivoRespaldo");
+                const estadoRespaldo = document.getElementById("estadoRespaldo");
+                const overlayRespaldo = document.getElementById("respaldoOverlay");
+                const estadoProcesoRespaldo = document.getElementById("estadoProcesoRespaldo");
+                seccionRespaldo.hidden = false;
+                const mostrarProcesoRespaldo = (activo, mensaje) => {
+                    estadoProcesoRespaldo.textContent = mensaje;
+                    overlayRespaldo.hidden = !activo;
+                    document.body.setAttribute("aria-busy", String(activo));
+                    btnExportarRespaldo.disabled = activo;
+                    btnAbrirImportacion.disabled = activo;
+                };
+                const mensajeErrorRespaldo = async (response, fallback) => {
+                    try {
+                        const data = await response.json();
+                        return data.error || fallback;
+                    } catch {
+                        return fallback;
+                    }
+                };
+                btnExportarRespaldo.addEventListener("click", async () => {
+                    estadoRespaldo.textContent = "";
+                    mostrarProcesoRespaldo(true, "Cargando archivos…");
+                    try {
+                        const response = await fetch("/api/ajustes/respaldo/exportar", {
+                            credentials: "same-origin",
+                        });
+                        if (!response.ok) throw new Error(await mensajeErrorRespaldo(response, "No se pudo exportar el respaldo."));
+                        const blob = await response.blob();
+                        const url = URL.createObjectURL(blob);
+                        const enlace = document.createElement("a");
+                        const disposition = response.headers.get("Content-Disposition") || "";
+                        const nombre = /filename="([^"]+)"/i.exec(disposition)?.[1] || "respaldo-cairo.zip";
+                        enlace.href = url;
+                        enlace.download = nombre;
+                        document.body.appendChild(enlace);
+                        enlace.click();
+                        enlace.remove();
+                        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        estadoRespaldo.textContent = "Respaldo ZIP exportado correctamente.";
+                    } catch (error) {
+                        estadoRespaldo.textContent = error.message || "No se pudo exportar el respaldo.";
+                    } finally {
+                        mostrarProcesoRespaldo(false, "Cargando archivos…");
+                    }
+                });
+                btnAbrirImportacion.addEventListener("click", () => inputRespaldo.click());
+                inputRespaldo.addEventListener("change", () => {
+                    const archivo = inputRespaldo.files[0];
+                    nombreArchivoRespaldo.textContent = archivo ? `Archivo seleccionado: ${archivo.name}` : "";
+                    estadoRespaldo.textContent = "";
+                });
+                inputRespaldo.addEventListener("change", async () => {
+                    const archivo = inputRespaldo.files[0];
+                    if (!archivo) return;
+                    if (!archivo.name.toLowerCase().endsWith(".zip")) {
+                        estadoRespaldo.textContent = "Selecciona un archivo ZIP de respaldo de CAIRO.";
+                        inputRespaldo.value = "";
+                        nombreArchivoRespaldo.textContent = "";
+                        return;
+                    }
+                    if (!window.confirm("Importar este respaldo reemplazará todos los datos actuales de CAIRO. Esta acción no se puede deshacer. ¿Deseas continuar?")) {
+                        inputRespaldo.value = "";
+                        nombreArchivoRespaldo.textContent = "";
+                        return;
+                    }
+                    estadoRespaldo.textContent = "";
+                    mostrarProcesoRespaldo(true, "Almacenando archivos…");
+                    try {
+                        const response = await fetch("/api/ajustes/respaldo/importar", {
+                            method: "POST",
+                            credentials: "same-origin",
+                            headers: { "Content-Type": "application/zip" },
+                            body: archivo,
+                        });
+                        if (!response.ok) throw new Error(await mensajeErrorRespaldo(response, "No se pudo importar el respaldo."));
+                        const result = await response.json();
+                        estadoRespaldo.textContent = `Respaldo restaurado correctamente. Se recuperaron ${result.archivos} archivos.`;
+                        inputRespaldo.value = "";
+                        window.setTimeout(() => window.location.reload(), 1600);
+                    } catch (error) {
+                        estadoRespaldo.textContent = error.message || "No se pudo importar el respaldo.";
+                        inputRespaldo.value = "";
+                        nombreArchivoRespaldo.textContent = "";
+                    } finally {
+                        mostrarProcesoRespaldo(false, "Almacenando archivos…");
+                    }
+                });
+                const seccionAforo = document.getElementById("configuracionAforo");
+                const campoCapacidad = document.getElementById("capacidadDiaria");
+                const estadoCapacidad = document.getElementById("estadoCapacidad");
+                seccionAforo.hidden = false;
+                const mostrarErrorAforo = (error) => {
+                    estadoCapacidad.textContent = error.message === "No encontrado"
+                        ? "El servidor de Cairo está desactualizado. Cierra su ventana o terminal y vuelve a iniciar Sistema Cairo.bat."
+                        : error.message;
+                };
+                Cairo.api("/ajustes/capacidad").then((configuracion) => {
+                    campoCapacidad.value = configuracion.capacidad_diaria;
+                }).catch((error) => {
+                    mostrarErrorAforo(error);
+                });
+                document.getElementById("formCapacidad").addEventListener("submit", async (event) => {
+                    event.preventDefault();
+                    const capacidad = Number(campoCapacidad.value);
+                    if (!Number.isSafeInteger(capacidad) || capacidad < 1) {
+                        estadoCapacidad.textContent = "Ingresa un número entero mayor que cero.";
+                        return;
+                    }
+                    const boton = document.getElementById("guardarCapacidad");
+                    boton.disabled = true;
+                    try {
+                        const guardada = await Cairo.api("/ajustes/capacidad", {
+                            method: "PUT",
+                            body: { capacidad_diaria: capacidad },
+                        });
+                        campoCapacidad.value = guardada.capacidad_diaria;
+                        estadoCapacidad.textContent = "Capacidad diaria guardada.";
+                    } catch (error) {
+                        mostrarErrorAforo(error);
+                    } finally {
+                        boton.disabled = false;
+                    }
+                });
+                const seccionHorario = document.getElementById("configuracionHorario");
+                const diasHorario = [
+                    ["lunes", "Lunes"], ["martes", "Martes"], ["miercoles", "Miércoles"],
+                    ["jueves", "Jueves"], ["viernes", "Viernes"], ["sabado", "Sábado"], ["domingo", "Domingo"],
+                ];
+                const horarioInicial = Object.fromEntries(diasHorario.map(([clave]) => [clave, {
+                    activo: ["lunes", "miercoles", "viernes"].includes(clave),
+                    inicio: "09:00",
+                    fin: "12:45",
+                }]));
+                const filasHorario = document.getElementById("filasHorario");
+                const estadoHorario = document.getElementById("estadoHorario");
+                seccionHorario.hidden = false;
+                filasHorario.innerHTML = diasHorario.map(([clave, nombre]) => `
+                    <tr data-dia="${clave}">
+                        <th scope="row">${nombre}</th>
+                        <td><input class="form-check-input horario-activo" type="checkbox" aria-label="Atención ${nombre}"></td>
+                        <td><input class="form-control horario-inicio" type="time" aria-label="Hora de inicio ${nombre}" required></td>
+                        <td><input class="form-control horario-fin" type="time" aria-label="Hora de cierre ${nombre}" required></td>
+                    </tr>`).join("");
+                const obtenerHorario = () => Object.fromEntries([...filasHorario.querySelectorAll("tr")].map((fila) => [
+                    fila.dataset.dia,
+                    {
+                        activo: fila.querySelector(".horario-activo").checked,
+                        inicio: fila.querySelector(".horario-inicio").value,
+                        fin: fila.querySelector(".horario-fin").value,
+                    },
+                ]));
+                const formatoHora = (hora) => {
+                    const [h, m] = hora.split(":").map(Number);
+                    return `${((h + 11) % 12) + 1}:${String(m).padStart(2, "0")} ${h < 12 ? "a. m." : "p. m."}`;
+                };
+                const actualizarReporte = () => {
+                    const horario = obtenerHorario();
+                    const activos = diasHorario.filter(([clave]) => horario[clave].activo);
+                    document.getElementById("resumenHorario").innerHTML = activos.length
+                        ? activos.map(([clave, nombre]) => `<tr><td>${nombre}</td><td>${formatoHora(horario[clave].inicio)} – ${formatoHora(horario[clave].fin)}</td></tr>`).join("")
+                        : '<tr><td colspan="2">No hay días de atención configurados.</td></tr>';
+                };
+                const aplicarHorario = (horario) => {
+                    filasHorario.querySelectorAll("tr").forEach((fila) => {
+                        const dia = horario[fila.dataset.dia];
+                        fila.querySelector(".horario-activo").checked = dia.activo;
+                        fila.querySelector(".horario-inicio").value = dia.inicio;
+                        fila.querySelector(".horario-fin").value = dia.fin;
+                    });
+                    actualizarReporte();
+                };
+                const mostrarErrorHorario = (error) => {
+                    estadoHorario.textContent = error.message === "No encontrado"
+                        ? "El servidor de Cairo está desactualizado. Cierra su ventana o terminal y vuelve a iniciar Sistema Cairo.bat."
+                        : error.message;
+                };
+                Cairo.api("/ajustes/horario").then(({ horario }) => {
+                    aplicarHorario(horario);
+                }).catch((error) => {
+                    aplicarHorario(horarioInicial);
+                    mostrarErrorHorario(error);
+                });
+                filasHorario.addEventListener("input", actualizarReporte);
+                filasHorario.addEventListener("change", actualizarReporte);
+                document.getElementById("formHorario").addEventListener("submit", async (event) => {
+                    event.preventDefault();
+                    const horario = obtenerHorario();
+                    if (!diasHorario.some(([clave]) => horario[clave].activo)) {
+                        estadoHorario.textContent = "Selecciona al menos un día de atención.";
+                        return;
+                    }
+                    if (diasHorario.some(([clave]) => horario[clave].activo && horario[clave].inicio >= horario[clave].fin)) {
+                        estadoHorario.textContent = "La hora de cierre debe ser posterior a la de inicio.";
+                        return;
+                    }
+                    const boton = document.getElementById("guardarHorario");
+                    boton.disabled = true;
+                    try {
+                        const guardado = await Cairo.api("/ajustes/horario", { method: "PUT", body: { horario } });
+                        aplicarHorario(guardado.horario);
+                        estadoHorario.textContent = "Horario de atención guardado.";
+                    } catch (error) {
+                        mostrarErrorHorario(error);
+                    } finally {
+                        boton.disabled = false;
+                    }
+                });
+                document.getElementById("exportarHorario").addEventListener("click", async (event) => {
+                    const boton = event.currentTarget;
+                    boton.disabled = true;
+                    try {
+                        const guardado = await Cairo.api("/ajustes/horario");
+                        aplicarHorario(guardado.horario);
+                        const logo = document.querySelector(".horario-reporte-cabecera img");
+                        if (logo.complete && !logo.naturalWidth) throw new Error("No se pudo cargar el logo de CAIRO.");
+                        if (!logo.complete) {
+                            await new Promise((resolve, reject) => {
+                                logo.onload = resolve;
+                                logo.onerror = () => reject(new Error("No se pudo cargar el logo de CAIRO."));
+                            });
+                        }
+                        if (!logo.naturalWidth) throw new Error("No se pudo cargar el logo de CAIRO.");
+                        window.print();
+                    } catch (error) {
+                        mostrarErrorHorario(error);
+                    } finally {
+                        boton.disabled = false;
+                    }
+                });
+            }
+            const btnTema = document.getElementById("btnTemaAjustes");
+            const actualizarTema = () => {
+                const oscuro = document.documentElement.dataset.tema === "oscuro";
+                btnTema.textContent = oscuro ? "☀ Tema claro" : "☾ Tema oscuro";
+                btnTema.setAttribute("aria-pressed", String(oscuro));
+            };
+            btnTema.addEventListener("click", () => {
+                const tema = document.documentElement.dataset.tema === "oscuro" ? "claro" : "oscuro";
+                try {
+                    localStorage.setItem("cairo-tema", tema);
+                } catch (_) {
+                    estado.textContent = "No se pudo guardar el tema en este navegador.";
+                    return;
+                }
+                document.documentElement.dataset.tema = tema;
+                actualizarTema();
+            });
+            actualizarTema();
+            opciones.forEach((opcion) => {
+                opcion.checked = localStorage.getItem(`cairo-resumen-oculto-${opcion.dataset.bloque}`) === "true";
+                opcion.addEventListener("change", () => {
+                    try {
+                        localStorage.setItem(`cairo-resumen-oculto-${opcion.dataset.bloque}`, String(opcion.checked));
+                        estado.textContent = "Preferencia guardada.";
+                    } catch (_) {
+                        opcion.checked = !opcion.checked;
+                        estado.textContent = "No se pudo guardar el ajuste en este navegador.";
+                    }
+                });
+            });
+            document.getElementById("mostrarTodo").addEventListener("click", () => {
+                try {
+                    opciones.forEach((opcion) => {
+                        localStorage.setItem(`cairo-resumen-oculto-${opcion.dataset.bloque}`, "false");
+                        opcion.checked = false;
+                    });
+                    estado.textContent = "Todos los bloques volverán a mostrarse en Inicio.";
+                } catch (_) {
+                    estado.textContent = "No se pudieron guardar los cambios en este navegador.";
+                }
+            });
+        });
+    </script>
+</body>
+</html>

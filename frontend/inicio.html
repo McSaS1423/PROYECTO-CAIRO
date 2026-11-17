@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen General (Semanal) · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+</head>
+<body data-active="inicio" data-title="Panel de control" data-crumb="Resumen General">
+
+    <template id="acciones">
+        <a class="btn btn-soft" href="pacientes.html">Ver pacientes</a>
+        <a class="btn cairo-btn" href="formulario_paciente.html">＋ Nuevo Registro</a>
+    </template>
+    <main id="contenido" class="dashboard-home">
+        <section class="dashboard-welcome mb-4" aria-label="Bienvenida" data-resumen="bienvenida">
+            <div class="dashboard-welcome-copy">
+                <span class="dashboard-kicker">CLÍNICA &amp; REFUGIO CAIRO</span>
+                <h2 class="h3 fw-bold mt-2 mb-1" id="saludo">¡Te damos la bienvenida!</h2>
+                <p class="mb-0">Nos alegra tenerte aquí. Gracias por cuidar de cada paciente.</p>
+            </div>
+            <img class="dashboard-welcome-art" src="img/logo-cairo-banner.png" alt="Logo de CAIRO">
+        </section>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3" data-resumen="encabezado">
+            <div class="seccion-titulo mb-0">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h2v16h16v2H3V3Zm4 10 3-4 3 3 5-6 1.500 1.300L13.200 15 10 11.800 8.600 14 7 13Z"/></svg>
+                PULSO CLÍNICO SEMANAL (CICLO DE 7 DÍAS)
+            </div>
+            <span class="pill gris">Últimos 7 días · hasta hoy</span>
+        </div>
+        <div class="row g-3 row-cols-2 row-cols-md-3 row-cols-xl-4 mb-4" id="stats" data-resumen="metricas" aria-busy="true">
+            <div class="col"><div class="stat-skeleton"><span class="skeleton skeleton-line skeleton-line-sm"></span><span class="skeleton skeleton-line" style="width:38%;height:2.4rem"></span><span class="skeleton skeleton-line skeleton-line-lg"></span></div></div>
+            <div class="col"><div class="stat-skeleton"><span class="skeleton skeleton-line skeleton-line-sm"></span><span class="skeleton skeleton-line" style="width:38%;height:2.4rem"></span><span class="skeleton skeleton-line skeleton-line-lg"></span></div></div>
+            <div class="col"><div class="stat-skeleton"><span class="skeleton skeleton-line skeleton-line-sm"></span><span class="skeleton skeleton-line" style="width:38%;height:2.4rem"></span><span class="skeleton skeleton-line skeleton-line-lg"></span></div></div>
+            <div class="col"><div class="stat-skeleton"><span class="skeleton skeleton-line skeleton-line-sm"></span><span class="skeleton skeleton-line" style="width:38%;height:2.4rem"></span><span class="skeleton skeleton-line skeleton-line-lg"></span></div></div>
+        </div>
+        <div class="row g-4 mb-4 dashboard-row">
+            <div class="col-lg-7" data-resumen="grafico_mensual">
+                <section class="cairo-card dashboard-chart p-4 h-100" aria-labelledby="chartTitle">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+                        <div>
+                            <span class="dashboard-kicker">ACTIVIDAD CLÍNICA</span>
+                            <h2 class="h5 fw-bold mb-1 mt-1" id="chartTitle">Actividad mensual</h2>
+                            <p class="text-muted small mb-0">Atenciones y procedimientos registrados en los últimos 12 meses</p>
+                        </div>
+                        <span class="dashboard-total" id="totalConsultas">0 registros</span>
+                    </div>
+                    <div class="chart-frame">
+                        <div class="chart-y-axis" aria-hidden="true">
+                            <span id="chartMaximo">0</span><span id="chartMedio">0</span><span>0</span>
+                        </div>
+                        <div class="chart-plot">
+                            <div class="chart-grid" aria-hidden="true"><span></span><span></span><span></span></div>
+                            <svg id="chartConsultas" viewBox="0 0 720 270" role="img" aria-labelledby="chartTitle chartDescription">
+                                <desc id="chartDescription">Atenciones y procedimientos registrados por mes durante los últimos 12 meses.</desc>
+                            </svg>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-lg-5" data-resumen="agenda">
+                <section class="cairo-card dashboard-appointments p-4 h-100" aria-labelledby="agendaTitle">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="dashboard-kicker">ORGANIZACIÓN DIARIA</span>
+                            <h2 class="h5 mb-0 mt-1 fw-bold" id="agendaTitle">Agenda</h2>
+                        </div>
+                        <a href="citas.html" class="pill text-decoration-none">Ver agenda</a>
+                    </div>
+                    <div id="agenda" aria-busy="true">
+                        <div class="skeleton-card mb-2"><span class="skeleton skeleton-line skeleton-line-lg mb-2"></span><span class="skeleton skeleton-line skeleton-line-sm"></span></div>
+                        <div class="skeleton-card"><span class="skeleton skeleton-line skeleton-line-lg mb-2"></span><span class="skeleton skeleton-line skeleton-line-sm"></span></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <div class="row g-4 mb-4 dashboard-row">
+            <div class="col-lg-7" data-resumen="eventos">
+                <section class="cairo-card dashboard-events p-4 h-100" aria-labelledby="eventosTitle">
+                    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                        <div>
+                            <span class="dashboard-kicker">PLANIFICACIÓN</span>
+                            <h2 class="h5 mb-0 mt-1 fw-bold" id="eventosTitle">Próximos eventos y jornadas</h2>
+                        </div>
+                        <a href="modulos.html?modulo=jornadas" class="pill text-decoration-none">Ver jornadas</a>
+                    </div>
+                    <form id="formEvento" class="dashboard-event-form mb-3">
+                        <label class="visually-hidden" for="eventoDescripcion">Nombre del evento o jornada</label>
+                        <input id="eventoDescripcion" class="form-control" type="text" maxlength="160" placeholder="Jornada de vacunación" required>
+                        <label class="visually-hidden" for="eventoFecha">Fecha estimada</label>
+                        <input id="eventoFecha" class="form-control" type="date" required>
+                        <button id="btnGuardarEvento" class="btn cairo-btn" type="submit">＋ Agregar</button>
+                        <button id="btnCancelarEvento" class="btn btn-soft" type="button" hidden>Cancelar</button>
+                    </form>
+                    <div id="eventosLista" aria-live="polite">
+                        <div class="skeleton-card"><span class="skeleton skeleton-line skeleton-line-lg mb-2"></span><span class="skeleton skeleton-line skeleton-line-sm"></span></div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-lg-5" data-resumen="stock">
+                <section class="cairo-card dashboard-stock p-4 h-100" aria-labelledby="stockTitle">
+                    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                        <div>
+                            <span class="dashboard-kicker">INVENTARIO</span>
+                            <h2 class="h5 mb-0 mt-1 fw-bold" id="stockTitle">Control de Stock</h2>
+                        </div>
+                        <a href="modulos.html?modulo=inventario" class="pill text-decoration-none">Ver inventario</a>
+                    </div>
+                    <p class="dashboard-stock-note">Alertas para productos con 5 unidades o menos · actualización automática</p>
+                    <div id="stockLista" aria-live="polite" aria-busy="true">
+                        <div class="skeleton-card"><span class="skeleton skeleton-line skeleton-line-lg mb-2"></span><span class="skeleton skeleton-line skeleton-line-sm"></span></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/avatar.js"></script>
+    <script>
+
+        Cairo.ready.then(async (usuario) => {
+            const hora = new Date().getHours();
+            const saludo = hora < 12 ? "¡Buenos días" : hora < 19 ? "¡Buenas tardes" : "¡Buenas noches";
+            document.getElementById("saludo").textContent = `${saludo}, ${usuario.nombre}!`;
+            try {
+                const d = await Cairo.api("/dashboard");
+                const iconos = {
+                    pacientes: '<path d="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-7 9a7 7 0 0 1 14 0H5ZM3 8c0-1.7 1.2-3 2.7-3 .8 0 1.5.4 2 1.1A5.2 5.2 0 0 0 7 9a5 5 0 0 0 .4 2H5.7C4.2 11 3 9.7 3 8Zm18 0c0-1.7-1.2-3-2.7-3-.8 0-1.5.4-2 1.1A5.2 5.2 0 0 1 16 9a5 5 0 0 1-.4 2h1.7c1.5 0 2.7-1.3 2.7-3Z"/>',
+                    propietarios: '<path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 .5a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM9 13c-3.3 0-7 1.7-7 4.5V20h14v-2.5C16 14.7 12.3 13 9 13Zm7.5.2c.4 0 .8-.1 1.2-.1 3.8 0 6.3 1.3 6.3 3.9v3h-5v-2.5c0-1.6-.6-3-1.5-4.3Z"/>',
+                    vacunaciones: '<path d="m19.8 4.2-1.4-1.4-3.1 3.1-1.4-1.4-1.4 1.4 1.4 1.4-8.8 8.8V21h4.9l8.8-8.8 1.4 1.4 1.4-1.4-1.4-1.4 3.1-3.1-1.4-1.4-3.1 3.1-2-2 3-3.2ZM8 19H6v-2l7.5-7.5 2 2L8 19Z"/>',
+                    desparasitaciones: '<path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>',
+                    castraciones: '<path d="M7 3v18m5-18v18M5 8h4m-4 5h4m-4 5h4m6-15 4 4-4 4m4-4h-5m1 12 4-4-4-4m4 4h-5"/>',
+                    esterilizaciones: '<path d="M12 3v18m0-14c-3-4-7-2-7 1s4 5 7 6m0-7c3-4 7-2 7 1s-4 5-7 6m-5 5h10"/>',
+                    consultas: '<path d="M8 3H5a2 2 0 0 0-2 2v3a8 8 0 0 0 7 8v3a2 2 0 0 0 4 0v-3a8 8 0 0 0 7-8V5a2 2 0 0 0-2-2h-3m-8 0v4m8-4v4"/>',
+                };
+                const c = (key, lbl, num, pie, cls, icon) => `
+                    <div class="col"><div class="dashboard-stat-wrap">
+                    <button class="stat stat-${icon}" type="button" data-stat="${key}" aria-expanded="false" aria-controls="stat-list-${key}">
+                        <span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor">${iconos[icon]}</svg></span>
+                        <span class="lbl">${lbl}</span><span class="num">${Cairo.esc(num)}</span><span class="pie ${cls}">${pie}</span>
+                    </button>
+                    <section class="stat-details" id="stat-list-${key}" aria-label="${lbl}" hidden></section>
+                    </div></div>`;
+                const tarjetas = [
+                    c("pacientes", "Pacientes atendidos", d.pacientes_atendidos, "Ver actividad ›", "", "pacientes"),
+                    c("propietarios", "Propietarios", d.propietarios, "Ver tutores ›", "", "propietarios"),
+                ];
+                const accesoClinicoCompleto = !["Veterinario", "Asistente"].includes(usuario.rol);
+                if (accesoClinicoCompleto) {
+                    tarjetas.push(
+                        c("vacunaciones", "Vacunaciones", d.vacunaciones, d.vacunaciones ? "Ver actividad ›" : "Sin registros", "ok", "vacunaciones"),
+                        c("desparasitaciones", "Desparasitaciones", d.desparasitaciones, d.desparasitaciones ? "Ver actividad ›" : "Sin registros", "", "desparasitaciones"),
+                        c("castraciones", "Castraciones", d.castraciones, d.castraciones ? "Ver actividad ›" : "Sin registros", "", "castraciones"),
+                        c("esterilizaciones", "Esterilizaciones", d.esterilizaciones, d.esterilizaciones ? "Ver actividad ›" : "Sin registros", "azul", "esterilizaciones"),
+                        c("consultas", "Consulta General", d.consultas, d.consultas ? "Ver actividad ›" : "Sin registros", "", "consultas"),
+                    );
+                }
+                document.getElementById("stats").innerHTML = tarjetas.join("");
+                document.getElementById("stats").setAttribute("aria-busy", "false");
+                const listas = d.listas || {};
+                const listaFecha = (fecha) => fecha ? Cairo.esc(Cairo.fmt.fecha(fecha) || fecha) : "—";
+                const avatarLista = (item) => item.foto
+                    ? `<img src="/uploads/${Cairo.esc(item.foto)}" alt="">`
+                    : CairoAvatar.svg(item.avatar_data, "Paciente");
+                const enlacePaciente = (item) => `<a href="pacientes.html" class="summary-name">${Cairo.esc(item.paciente)}</a>`;
+                const enlacePropietario = (item) => item.propietario_id
+                    ? `<a href="propietarios.html" class="summary-owner">${Cairo.esc([item.propietario, item.propietario_apellido].filter(Boolean).join(" "))}</a>`
+                    : '<span class="summary-owner">Sin propietario</span>';
+                const fichaPaciente = (item) => `<article class="summary-item">
+                    <span class="summary-avatar">${avatarLista(item)}</span>
+                    <span class="summary-main">${enlacePaciente(item)}<small>${enlacePropietario(item)}</small></span>
+                    <span class="summary-meta"><span>${Cairo.esc(item.motivo || "Atención registrada")}</span><time>${listaFecha(item.fecha)}</time></span>
+                </article>`;
+                const fichaPropietario = (item) => `<article class="summary-item summary-item-owner">
+                    <span class="summary-main"><a href="propietarios.html" class="summary-name">${Cairo.esc([item.propietario, item.propietario_apellido].filter(Boolean).join(" "))}</a>
+                        <small><a href="pacientes.html" class="summary-owner">${Cairo.esc(item.paciente)}</a></small></span>
+                    <span class="summary-meta"><span>${Cairo.esc(item.motivo || "Atención registrada")}</span><time>${listaFecha(item.fecha)}</time></span>
+                </article>`;
+                const listaStats = document.getElementById("stats");
+                listaStats.addEventListener("click", (event) => {
+                    const trigger = event.target.closest("[data-stat]");
+                    if (!trigger) return;
+                    const wasOpen = trigger.getAttribute("aria-expanded") === "true";
+                    listaStats.querySelectorAll("[data-stat]").forEach((button) => {
+                        button.setAttribute("aria-expanded", "false");
+                        document.getElementById(button.getAttribute("aria-controls")).hidden = true;
+                    });
+                    if (wasOpen) return;
+                    const key = trigger.dataset.stat;
+                    const panel = document.getElementById(trigger.getAttribute("aria-controls"));
+                    const items = listas[key] || [];
+                    const renderItem = key === "propietarios" ? fichaPropietario : fichaPaciente;
+                    panel.innerHTML = items.length
+                        ? `<div class="summary-list">${items.map(renderItem).join("")}</div>`
+                        : '<p class="summary-empty mb-0">No hay registros recientes.</p>';
+                    trigger.setAttribute("aria-expanded", "true");
+                    panel.hidden = false;
+                });
+                document.addEventListener("click", (event) => {
+                    if (event.target.closest("#stats")) return;
+                    listaStats.querySelectorAll("[data-stat][aria-expanded='true']").forEach((button) => {
+                        button.setAttribute("aria-expanded", "false");
+                        document.getElementById(button.getAttribute("aria-controls")).hidden = true;
+                    });
+                });
+                document.addEventListener("keydown", (event) => {
+                    if (event.key !== "Escape") return;
+                    listaStats.querySelectorAll("[data-stat][aria-expanded='true']").forEach((button) => {
+                        button.setAttribute("aria-expanded", "false");
+                        document.getElementById(button.getAttribute("aria-controls")).hidden = true;
+                        button.focus();
+                    });
+                });
+
+                const hoy = d.hoy;
+                const mananaFecha = new Date(`${hoy}T00:00:00Z`);
+                mananaFecha.setUTCDate(mananaFecha.getUTCDate() + 1);
+                const manana = mananaFecha.toISOString().slice(0, 10);
+                const cuando = (c) => (c.fecha === hoy ? "Hoy" : c.fecha === manana ? "Mañana"
+                    : new Date(c.fecha + "T00:00").toLocaleDateString("es", { weekday: "long" }).replace(/^./, m => m.toUpperCase()))
+                    + ", " + Cairo.fmt.hora(c.hora);
+                const agenda = document.getElementById("agenda");
+                agenda.innerHTML = d.agenda.length ? d.agenda.map(c => {
+                    const fecha = new Date(c.fecha + "T12:00:00");
+                    const mes = fecha.toLocaleDateString("es", { month: "short" }).replace(".", "");
+                    const avatar = c.foto_url
+                        ? `<img src="${Cairo.esc(c.foto_url)}" alt="">`
+                        : CairoAvatar.svg(c.avatar_data, "Paciente");
+                    const propietario = [c.propietario, c.propietario_apellido].filter(Boolean).join(" ");
+                    return `<article class="appointment ${c.fecha === manana ? "appointment-alert" : ""}">
+                        <div class="appointment-date"><strong>${+c.fecha.slice(8)}</strong><span>${Cairo.esc(mes)}</span></div>
+                        <div class="appointment-avatar">${avatar}</div>
+                        <div class="appointment-info">
+                            <strong><a href="pacientes.html" class="appointment-patient">${Cairo.esc(c.paciente)}</a></strong>
+                            <span>${Cairo.esc(propietario || "Sin propietario")}</span>
+                            <span>${c.telefono ? `<a href="tel:${encodeURIComponent(c.telefono)}" class="appointment-phone">${Cairo.esc(c.telefono)}</a>` : "Teléfono no registrado"}</span>
+                            <span>${Cairo.esc(cuando(c))}</span>
+                            <span class="appointment-type">${Cairo.esc(c.procedimiento || "Consulta")}</span>
+                        </div>
+                        <a class="appointment-link" href="historia_medica.html?id=${encodeURIComponent(c.paciente_id)}" aria-label="Abrir ficha de ${Cairo.esc(c.paciente)}">›</a>
+                    </article>`;
+                }).join("") : '<div class="vacio">No hay citas próximas.</div>';
+                agenda.setAttribute("aria-busy", "false");
+
+                const actividadDisponible = Array.isArray(d.actividad_mensual) ? d.actividad_mensual : [];
+                const fechaActual = new Date(`${d.hoy}T12:00:00`);
+                const actividad = Array.from({ length: 12 }, (_, index) => {
+                    const fecha = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - 11 + index, 1);
+                    const mes = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`;
+                    const registro = actividadDisponible.find((item) => item.mes === mes);
+                    return { mes, cantidad: Math.max(0, Number(registro?.cantidad) || 0) };
+                });
+                const maximo = Math.max(0, ...actividad.map((item) => item.cantidad));
+                const paso = maximo <= 5 ? 1 : maximo <= 10 ? 2 : maximo <= 25 ? 5
+                    : maximo <= 50 ? 10 : maximo <= 100 ? 20 : maximo <= 250 ? 50 : Math.ceil(maximo / 40) * 10;
+                const escala = Math.max(paso * 4, paso);
+                const total = actividad.reduce((suma, item) => suma + item.cantidad, 0);
+                document.getElementById("totalConsultas").textContent =
+                    `${total} registro${total === 1 ? "" : "s"}`;
+                document.getElementById("chartMaximo").textContent = escala;
+                document.getElementById("chartMedio").textContent = escala / 2;
+
+                const puntos = actividad.map((item, index) => ({
+                    x: 35 + index * (650 / 11),
+                    y: 214 - (item.cantidad / escala) * 178,
+                    cantidad: item.cantidad,
+                    mes: new Date(`${item.mes}-01T12:00:00`).toLocaleDateString("es", { month: "short" }).replace(".", ""),
+                }));
+                const curva = puntos.map((punto, index) => {
+                    if (index === 0) return `M ${punto.x} ${punto.y}`;
+                    const anterior = puntos[index - 1];
+                    const siguiente = puntos[index + 1] || punto;
+                    const previo = puntos[index - 2] || anterior;
+                    const control1 = { x: anterior.x + (punto.x - previo.x) / 6, y: anterior.y + (punto.y - previo.y) / 6 };
+                    const control2 = { x: punto.x - (siguiente.x - anterior.x) / 6, y: punto.y - (siguiente.y - anterior.y) / 6 };
+                    return `C ${control1.x} ${control1.y}, ${control2.x} ${control2.y}, ${punto.x} ${punto.y}`;
+                }).join(" ");
+                const areaSvg = puntos.length
+                    ? `<path class="chart-area" d="${curva} L ${puntos[puntos.length - 1].x} 214 L ${puntos[0].x} 214 Z"></path>`
+                    : "";
+                const lineaSvg = puntos.length
+                    ? `<path class="chart-line" d="${curva}"></path>
+                       ${puntos.map((punto) => `<circle class="chart-dot" cx="${punto.x}" cy="${punto.y}" r="5"></circle>`).join("")}`
+                    : "";
+                const barrasSvg = puntos.map((punto, index) => `
+                    <rect class="chart-bar-svg" x="${punto.x - 12}" y="${punto.y}" width="24" height="${214 - punto.y}" rx="6" style="animation-delay:${index * 45}ms"></rect>
+                `).join("");
+                const etiquetasSvg = puntos.map((punto) => `
+                    <text class="chart-count" x="${punto.x}" y="${Math.max(28, punto.y - 12)}" text-anchor="middle">${punto.cantidad}</text>
+                    <text class="chart-month-svg" x="${punto.x}" y="250" text-anchor="middle">${Cairo.esc(punto.mes)}</text>
+                `).join("");
+                document.getElementById("chartConsultas").innerHTML =
+                    `<desc id="chartDescription">Total: ${total} registros clínicos en los últimos 12 meses. ${actividad.map((item, index) => `${puntos[index].mes}: ${item.cantidad}`).join("; ")}.</desc>${barrasSvg}${areaSvg}${lineaSvg}${etiquetasSvg}`;
+                const linea = document.querySelector("#chartConsultas .chart-line");
+                if (linea && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                    const longitud = linea.getTotalLength();
+                    linea.style.strokeDasharray = `${longitud}`;
+                    linea.style.strokeDashoffset = `${longitud}`;
+                    requestAnimationFrame(() => { linea.style.strokeDashoffset = "0"; });
+                }
+                agenda.querySelectorAll(".appointment-avatar img").forEach((img) => {
+                    img.addEventListener("error", () => {
+                        img.parentElement.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0H5Z"/></svg>';
+                    }, { once: true });
+                });
+                Cairo.aplicarAjustesResumen();
+            } catch (e) {
+                const stats = document.getElementById("stats");
+                const agenda = document.getElementById("agenda");
+                if (stats.getAttribute("aria-busy") === "true") {
+                    stats.setAttribute("aria-busy", "false");
+                    stats.innerHTML = '<div class="col-12"><div class="dashboard-error">No se pudieron cargar los indicadores.</div></div>';
+                }
+                if (agenda.getAttribute("aria-busy") === "true") {
+                    agenda.setAttribute("aria-busy", "false");
+                    agenda.innerHTML = '<div class="dashboard-error">No se pudo cargar la agenda.</div>';
+                }
+                Cairo.aplicarAjustesResumen();
+                Cairo.toast(e.message, "error");
+            }
+        });
+
+        Cairo.ready.then(async (usuario) => {
+            if (["Veterinario", "Asistente"].includes(usuario.rol)) {
+                document.querySelector('[data-resumen="eventos"]').hidden = true;
+                document.querySelector('[data-resumen="stock"]').hidden = true;
+                document.querySelector('[data-resumen="eventos"]').closest(".dashboard-row").hidden = true;
+                return;
+            }
+            const formEvento = document.getElementById("formEvento");
+            const campoDescripcion = document.getElementById("eventoDescripcion");
+            const campoFecha = document.getElementById("eventoFecha");
+            const listaEventos = document.getElementById("eventosLista");
+            const botonGuardarEvento = document.getElementById("btnGuardarEvento");
+            const botonCancelarEvento = document.getElementById("btnCancelarEvento");
+            let eventoEditando = null;
+            const fechaLocal = new Date();
+            campoFecha.min = new Date(fechaLocal.getTime() - fechaLocal.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+            const renderEventos = async () => {
+                const ahora = new Date();
+                const hoy = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+                const eventos = (await Cairo.api("/modulos/jornadas"))
+                    .filter((evento) => evento.fecha >= hoy)
+                    .sort((a, b) => a.fecha.localeCompare(b.fecha) || Number(a.id) - Number(b.id));
+                listaEventos.innerHTML = eventos.length ? eventos.map((evento) => `
+                    <article class="dashboard-event-item">
+                        <div><strong>${Cairo.esc(evento.descripcion || "Jornada")}</strong><time>${Cairo.esc(Cairo.fmt.fecha(evento.fecha) || evento.fecha)}</time></div>
+                        <div class="dashboard-event-actions">
+                            <button type="button" class="btn-icon" data-event-edit="${Number(evento.id)}" aria-label="Editar ${Cairo.esc(evento.descripcion || "jornada")}">✎</button>
+                            <button type="button" class="btn-icon peligro" data-event-delete="${Number(evento.id)}" aria-label="Eliminar ${Cairo.esc(evento.descripcion || "jornada")}">×</button>
+                        </div>
+                    </article>`).join("") : '<p class="summary-empty mb-0">No hay eventos próximos.</p>';
+            };
+            const limpiarEvento = () => {
+                eventoEditando = null;
+                formEvento.reset();
+                botonGuardarEvento.textContent = "＋ Agregar";
+                botonCancelarEvento.hidden = true;
+            };
+
+            try {
+                await renderEventos();
+            } catch (error) {
+                listaEventos.innerHTML = `<div class="dashboard-error">No se pudieron cargar los eventos: ${Cairo.esc(error.message)}</div>`;
+            }
+
+            formEvento.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const data = { descripcion: campoDescripcion.value.trim(), fecha: campoFecha.value };
+                botonGuardarEvento.disabled = true;
+                try {
+                    await Cairo.api(eventoEditando ? `/modulos/jornadas/${eventoEditando}` : "/modulos/jornadas", {
+                        method: eventoEditando ? "PUT" : "POST",
+                        body: data,
+                    });
+                    limpiarEvento();
+                    await renderEventos();
+                    Cairo.toast("Evento guardado");
+                } catch (error) {
+                    Cairo.toast(error.message, "error");
+                } finally {
+                    botonGuardarEvento.disabled = false;
+                }
+            });
+            botonCancelarEvento.addEventListener("click", limpiarEvento);
+            listaEventos.addEventListener("click", async (event) => {
+                const editar = event.target.closest("[data-event-edit]");
+                const eliminar = event.target.closest("[data-event-delete]");
+                try {
+                    if (editar) {
+                        const jornadas = await Cairo.api("/modulos/jornadas");
+                        const jornada = jornadas.find((item) => Number(item.id) === Number(editar.dataset.eventEdit));
+                        if (!jornada) throw new Error("El evento ya no está disponible");
+                        eventoEditando = jornada.id;
+                        campoDescripcion.value = jornada.descripcion || "";
+                        campoFecha.value = jornada.fecha;
+                        botonGuardarEvento.textContent = "Guardar cambios";
+                        botonCancelarEvento.hidden = false;
+                        campoDescripcion.focus();
+                    } else if (eliminar && confirm("¿Eliminar este evento? Esta acción no se puede deshacer.")) {
+                        await Cairo.api(`/modulos/jornadas/${eliminar.dataset.eventDelete}`, { method: "DELETE" });
+                        if (Number(eventoEditando) === Number(eliminar.dataset.eventDelete)) limpiarEvento();
+                        await renderEventos();
+                        Cairo.toast("Evento eliminado");
+                    }
+                } catch (error) {
+                    Cairo.toast(error.message, "error");
+                }
+            });
+
+            const listaStock = document.getElementById("stockLista");
+            const renderStock = async () => {
+                const stock = await Cairo.api("/dashboard/stock");
+                listaStock.innerHTML = stock.productos.length ? stock.productos.map((producto) => `
+                    <article class="dashboard-stock-item">
+                        <span class="dashboard-stock-warning" aria-hidden="true">!</span>
+                        <div><strong>${Cairo.esc(producto.nombre)}</strong>
+                            <small>${Cairo.esc(producto.cantidad)} ${Cairo.esc(producto.unidad || "unidades")} disponibles</small>
+                        </div>
+                    </article>`).join("") : '<p class="summary-empty mb-0">No hay productos agotados ni con 5 unidades o menos.</p>';
+                listaStock.setAttribute("aria-busy", "false");
+            };
+            const actualizarStock = () => renderStock().catch((error) => {
+                listaStock.setAttribute("aria-busy", "false");
+                listaStock.innerHTML = `<div class="dashboard-error">No se pudo actualizar el stock: ${Cairo.esc(error.message)}</div>`;
+            });
+            await actualizarStock();
+            window.setInterval(() => {
+                if (!document.hidden) actualizarStock();
+            }, 5000);
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) actualizarStock();
+            });
+        }).catch((error) => Cairo.toast(error.message, "error"));
+    </script>
+</body>
+</html>

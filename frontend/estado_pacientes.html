@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de pacientes · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+</head>
+<body data-active="estado-pacientes" data-title="Estado de pacientes" data-crumb="Estado de pacientes">
+    <template id="acciones">
+        <button class="btn btn-soft" id="btnRecargar" type="button">Actualizar</button>
+        <button class="btn cairo-btn" id="btnExportar" type="button">Exportar Excel</button>
+    </template>
+    <main id="contenido">
+        <section class="estado-pacientes-intro mb-4">
+            <h2 class="fuente-titulo mb-1">Seguimiento clínico</h2>
+            <p class="text-muted mb-0">Consulta quién fue atendido, quién tiene una atención pendiente y qué procedimientos necesita cada paciente.</p>
+        </section>
+
+        <section class="estado-pacientes-resumen mb-4" aria-label="Resumen de pacientes">
+            <article class="cairo-card estado-resumen-card"><span>Pacientes</span><strong id="totalPacientes">—</strong></article>
+            <article class="cairo-card estado-resumen-card"><span>Atendidos</span><strong id="totalAtendidos">—</strong></article>
+            <article class="cairo-card estado-resumen-card"><span>No atendidos aún</span><strong id="totalNoAtendidos">—</strong></article>
+            <article class="cairo-card estado-resumen-card"><span>Esterilizados</span><strong id="totalEsterilizados">—</strong></article>
+            <article class="cairo-card estado-resumen-card"><span>Necesitan esterilizarse</span><strong id="totalPendientesEsterilizacion">—</strong></article>
+            <article class="cairo-card estado-resumen-card"><span>Vacunados</span><strong id="totalVacunados">—</strong></article>
+            <article class="cairo-card estado-resumen-card"><span>Necesitan vacunarse</span><strong id="totalPendientesVacuna">—</strong></article>
+            <article class="cairo-card estado-resumen-card"><span>Necesitan desparasitarse</span><strong id="totalPendientesDesparasitacion">—</strong></article>
+            <article class="cairo-card estado-resumen-card"><span>Desparasitados</span><strong id="totalDesparasitados">—</strong></article>
+        </section>
+
+        <section class="search-panel-box mb-3">
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <label class="visually-hidden" for="busquedaEstado">Buscar pacientes</label>
+                    <input id="busquedaEstado" class="form-control" type="search" placeholder="Buscar por paciente, código, especie, raza o propietario…">
+                </div>
+                <div class="col-md-4">
+                    <label class="visually-hidden" for="filtroEspecieEstado">Filtrar por especie</label>
+                    <select id="filtroEspecieEstado" class="form-select">
+                        <option value="">Todas las especies</option>
+                        <option>Gato</option>
+                        <option>Perro</option>
+                        <option>Otro</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="cairo-card p-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table tabla estado-pacientes-tabla mb-0">
+                    <thead>
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Propietario</th>
+                            <th>Atendido</th>
+                            <th>Esterilizado</th>
+                            <th>Vacunado</th>
+                            <th>Desparasitado</th>
+                            <th>Última atención</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyEstado">
+                        <tr><td colspan="7" class="vacio">Cargando pacientes…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/avatar.js"></script>
+    <script src="js/estado_pacientes.js"></script>
+</body>
+</html>

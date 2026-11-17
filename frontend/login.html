@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+        :root{
+            --gold:#F1C74F; --orange:#58B7DA; --ink:#0E5C84; --cream:#ECFAFF;
+            --font-title:'Playfair Display',Georgia,'Times New Roman',serif;
+            --font-body:'Poppins','Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%;margin:0}
+        body{font-family:var(--font-body);color:var(--ink);background:linear-gradient(180deg,#A7DDF0 0%,#8BCDEB 100%);overflow:hidden}
+
+        /* ═════ Fondo: fotos con transición cross-dissolve ═════ */
+        .slides{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,#A7DDF0 0%,#8BCDEB 100%)}
+        .slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:1;will-change:opacity,transform}
+        .slide.kb{animation:kenburns 9s ease-out forwards}
+        @keyframes kenburns{from{transform:scale(1.02)}to{transform:scale(1.12)}}
+        /* velo para que el formulario se lea sobre cualquier foto */
+        .veil{position:fixed;inset:0;z-index:1;pointer-events:none;
+            background:linear-gradient(90deg,rgba(13,54,76,.32) 0%,rgba(13,54,76,.2) 48%,rgba(13,54,76,.12) 100%)}
+        /* ═════ Contenido ═════ */
+        .stage{position:relative;z-index:3;height:100%;display:flex;align-items:center;justify-content:center;padding:2rem 8vw}
+        .login-card{width:100%;max-width:410px;padding:1.75rem 2rem 1.5rem;border-radius:24px;
+            background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.85);box-shadow:0 22px 60px rgba(8,48,70,.28);
+            animation:cardIn .9s cubic-bezier(.2,.8,.2,1) both}
+        @keyframes cardIn{from{opacity:0;transform:translateY(24px) scale(.98)}}
+        .logo-wrap{width:158px;height:158px;margin:0 auto .65rem;position:relative;overflow:hidden;border:5px solid #0d6b8e;border-radius:50%;
+            background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.72),0 10px 24px rgba(14,92,132,.2)}
+        .logo-wrap img{position:absolute;width:304%;max-width:none;height:auto;left:-102%;top:-77%;display:block}
+        .logo-wrap::before{content:none}
+        @keyframes float{50%{transform:translateY(-4px)}}
+        @keyframes ping{from{transform:scale(.92);opacity:.9}to{transform:scale(1.33);opacity:0}}
+        .login-card h1{font-family:var(--font-title);font-weight:700;font-size:2rem;text-align:center;margin:0;color:#55b7d9}
+        .login-card .sub{text-align:center;color:#2788ae;font-size:.62rem;font-weight:700;letter-spacing:.08em;margin:.1rem 0 1.15rem}
+        .form-label{font-size:.78rem;font-weight:600;color:#315b70}
+        .campo{position:relative}
+        .campo input{border-radius:12px;border:1px solid #c9dfe9;background:#fff;padding:.72rem 1rem;font-size:.95rem;color:var(--ink)}
+        .campo input:focus{border-color:var(--orange);box-shadow:0 0 0 .22rem rgba(88,183,218,.2)}
+        .campo .ojo{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:#0B5E87;padding:6px;line-height:0}
+        .campo .ojo svg{width:20px;height:20px}
+        .btn-entrar{width:100%;border:0;border-radius:14px;padding:.8rem;font-weight:700;color:#fff;font-size:1rem;letter-spacing:.3px;
+            background:linear-gradient(135deg,#53B7DB,#2F9CC8);box-shadow:0 12px 24px -10px rgba(14,92,132,.8);transition:.2s}
+        .btn-entrar:hover{transform:translateY(-1px);filter:brightness(1.04)}
+        .btn-entrar:disabled{opacity:.7;transform:none}
+        .error{display:none;background:rgba(255,255,255,.7);color:#0B5E87;border-radius:12px;padding:.6rem .9rem;font-size:.85rem;margin-bottom:1rem}
+        .error.on{display:block;animation:shake .4s}
+        @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+        .pie{text-align:center;font-size:.72rem;color:#607985;margin-top:1rem}
+        .share-menu{position:fixed;z-index:5;top:1.2rem;right:1.5rem;width:48px;height:48px;display:flex;flex-direction:column;justify-content:center;gap:5px;
+            padding:0 12px;border:1px solid rgba(21,111,161,.15);border-radius:14px;background:rgba(255,255,255,.9);box-shadow:0 8px 24px rgba(16,73,94,.18)}
+        .share-menu span{height:2px;width:100%;border-radius:2px;background:#1D7097}
+        .share-menu:hover{background:#fff;transform:translateY(-1px)}
+        .share-menu:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+        /* leyenda de la foto + indicadores */
+        .caption{position:fixed;z-index:3;left:7vw;bottom:5vh;color:#fff;max-width:420px;pointer-events:none}
+        .caption small{letter-spacing:3px;font-size:.7rem;color:var(--gold);font-weight:700}
+        .caption p{font-family:var(--font-title);font-size:1.7rem;line-height:1.2;margin:.2rem 0 0;text-shadow:0 2px 14px rgba(0,0,0,.6);transition:.5s}
+        .caption.swap p,.caption.swap small{opacity:0;transform:translateY(8px)}
+        .caption p,.caption small{transition:.5s}
+        .dots{position:fixed;z-index:3;right:5vw;bottom:5vh;display:flex;gap:.55rem}
+        .dots i{width:34px;height:4px;border-radius:4px;background:rgba(255,255,255,.35);overflow:hidden;position:relative}
+        .dots i::after{content:"";position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left}
+        .dots i.done::after{transform:scaleX(1)}
+        .dots i.on::after{animation:fill var(--dur,6s) linear forwards}
+        @keyframes fill{to{transform:scaleX(1)}}
+
+        /* ═════ Pantalla de entrada al sistema (splash) ═════ */
+        .splash{position:fixed;inset:0;z-index:100;pointer-events:none;visibility:hidden}
+        .splash.on{visibility:visible;pointer-events:all}
+        .curtain{position:absolute;inset:-5vh -8vw;background:linear-gradient(135deg,#D6F4FF 0%,#81D4F5 45%,#41A9D2 100%);
+            clip-path:polygon(0 0,0 0,-14% 100%,0 100%)}
+        .curtain.b{background:#153C52;clip-path:polygon(0 0,0 0,-14% 100%,0 100%)}
+        .splash-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink);opacity:0}
+        .splash.on .splash-in{opacity:1}
+        .s-logo{position:relative;width:min(260px,62vw);height:min(260px,62vw);border:6px solid #0d6b8e;border-radius:50%;
+            background:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.68),0 18px 38px rgba(18,86,115,.28);
+            opacity:0;transform:translateY(14px) scale(.96);overflow:hidden}
+        .s-logo img{position:absolute;width:304%;max-width:none;height:auto;left:-102%;top:-77%;display:block}
+        .splash.on .s-logo{animation:logoIn .8s .45s cubic-bezier(.2,.8,.2,1) forwards}
+        @keyframes logoIn{to{opacity:1;transform:none}}
+        .s-title{font-family:var(--font-title);font-weight:700;font-size:clamp(2rem,6vw,3.1rem);margin:1.1rem 0 0;letter-spacing:2px;opacity:0;transform:translateY(14px);color:var(--ink)}
+        .s-sub{letter-spacing:5px;font-size:.78rem;font-weight:700;opacity:0;margin-top:.2rem;color:#266C93}
+        .splash.on .s-title{animation:rise .7s 1.1s ease-out forwards}
+        .splash.on .s-sub{animation:rise .7s 1.3s ease-out forwards}
+        @keyframes rise{to{opacity:1;transform:none}}
+        .s-bar{width:min(240px,60vw);height:4px;border-radius:4px;background:rgba(20,94,140,.16);margin-top:1.8rem;overflow:hidden;opacity:0}
+        .s-bar::after{content:"";display:block;height:100%;background:#1A87BA;transform:scaleX(0);transform-origin:left}
+        .splash.on .s-bar{animation:rise .4s 1.5s forwards}
+        .splash.on .s-bar::after{animation:load 1.3s 1.5s ease-in-out forwards}
+        @keyframes load{to{transform:scaleX(1)}}
+        .s-hello{margin-top:.7rem;font-size:.95rem;font-weight:600;opacity:0;color:#174F70}
+        .splash.on .s-hello{animation:rise .6s 1.6s forwards}
+
+        @media (max-width:760px){
+            body{overflow:auto;min-height:100%;height:auto}
+            .stage{min-height:100vh;height:auto;justify-content:center;align-items:center;overflow-y:auto;padding:4.5rem 1rem 5rem}
+            .veil{background:linear-gradient(0deg,rgba(10,42,58,.56),rgba(10,42,58,.24))}
+            .caption{display:none}
+            .dots{right:50%;transform:translateX(50%)}
+            .login-card{max-width:410px;padding:1.5rem 1.35rem 1.3rem}
+            .logo-wrap{width:min(158px,48vw);height:min(158px,48vw);margin-bottom:.65rem}
+        }
+        @media (prefers-reduced-motion:reduce){
+            .slide.kb,.logo-wrap img,.logo-wrap::before{animation:none}
+        }
+    </style>
+</head>
+<body>
+    <!-- Fotos -->
+    <div class="slides" id="slides"></div>
+    <div class="veil"></div>
+
+    <!-- Formulario -->
+    <main class="stage">
+        <section class="login-card">
+            <div class="logo-wrap"><img src="img/logo-cairo-login.png" alt="CAIRO: Donde la historia se transforma en esperanza"></div>
+            <h1>CAIRO</h1>
+            <p class="sub">DONDE LA HISTORIA SE TRANSFORMA EN ESPERANZA</p>
+
+            <div class="error" id="error" role="alert"></div>
+
+            <form id="form" autocomplete="on" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" for="usuario">Usuario</label>
+                    <div class="campo"><input id="usuario" name="usuario" type="text" class="form-control" placeholder="Ej: admin_cairo" autocomplete="username" required autofocus></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="clave">Contraseña</label>
+                    <div class="campo">
+                        <input id="clave" name="clave" type="password" class="form-control" placeholder="••••••••" autocomplete="current-password" required style="padding-right:2.8rem">
+                        <button type="button" class="ojo" id="ojo" aria-label="Mostrar contraseña">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5C7 5 2.7 8.1 1 12c1.700 3.900 6 7 11 7s9.300-3.100 11-7c-1.700-3.900-6-7-11-7Zm0 11.500a4.500 4.500 0 1 1 0-9 4.500 4.500 0 0 1 0 9Zm0-7a2.500 2.500 0 1 0 0 5 2.500 2.500 0 0 0 0-5Z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" id="recordar">
+                    <label class="form-check-label small text-muted" for="recordar">Mantener sesión iniciada</label>
+                </div>
+                <button class="btn-entrar" id="btn" type="submit">Ingresar</button>
+            </form>
+            <div class="pie">© Proyecto CAIRO · Cuidado y refugio felino</div>
+        </section>
+    </main>
+
+    <a class="share-menu" href="compartir.html" aria-label="Abrir compartir acceso" title="Compartir acceso">
+        <span></span><span></span><span></span>
+    </a>
+    <div class="caption" id="caption"><small id="capK"></small><p id="capT"></p></div>
+    <div class="dots" id="dots"></div>
+
+    <!-- Entrada al sistema -->
+    <div class="splash" id="splash" aria-hidden="true">
+        <div class="curtain" id="curtain"></div>
+        <div class="splash-in">
+            <div class="s-logo">
+                <img src="img/logo-cairo-login.png" alt="CAIRO: Donde la historia se transforma en esperanza">
+            </div>
+            <div class="s-title">CAIRO</div>
+            <div class="s-sub">SISTEMA CLÍNICO</div>
+            <div class="s-hello" id="hello"></div>
+            <div class="s-bar"></div>
+        </div>
+    </div>
+
+    <script>
+    /* ════════ Fotos (edita aquí rutas y leyendas) ════════ */
+    const FOTOS = [
+        { src: "img/slides/patio-cairo-historico.png", k: "NUESTRA HISTORIA", t: "Un espacio lleno de memoria y esperanza" },
+        { src: "img/slides/refugio-alimentacion.jpg", k: "CUIDADO DIARIO", t: "Alimento, atención y cariño para cada rescatado" },
+        { src: "img/slides/refugio-descanso.jpg", k: "UN HOGAR PARA TODOS", t: "Un lugar seguro para descansar y recuperarse" },
+        { src: "img/slides/refugio-cuidado.jpg", k: "COMPROMISO CAIRO", t: "Cuidar a cada animal transforma vidas" },
+        { src: "img/slides/fachada-cairo.jpg", k: "REFUGIO CAIRO", t: "Un hogar que abre sus puertas con amor" },
+        { src: "img/slides/patio-cairo-gatos.png", k: "COMUNIDAD", t: "Cada plato compartido es una vida acompañada" },
+        { src: "img/slides/gatos-refugio.jpg", k: "NUESTROS RESCATADOS", t: "Cada gato merece respeto, cuidado y un hogar" },
+    ];
+    const DURACION = 6500;      // ms que se muestra cada foto
+    const CROSSFADE = 1600;     // ms que dura la transición entre fotos
+
+    /* ════════ Slideshow con cross-dissolve ════════ */
+    const cont = document.getElementById("slides");
+    const caption = document.getElementById("caption");
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const dots = document.getElementById("dots");
+    FOTOS.forEach(() => dots.appendChild(document.createElement("i")));
+    FOTOS.forEach(f => { const i = new Image(); i.src = f.src; });   // precarga
+
+    let actual = -1, timer;
+
+    function mostrar(n, primera) {
+        const f = FOTOS[n];
+        const s = document.createElement("div");
+        s.className = "slide kb";
+        s.style.backgroundImage = `url("${f.src}")`;
+        s.style.opacity = primera || reduce ? "1" : "0";
+        cont.appendChild(s);
+
+        const prev = cont.children.length > 1 ? cont.children[cont.children.length - 2] : null;
+        if (!primera && !reduce) {
+            requestAnimationFrame(() => {
+                s.style.transition = `opacity ${CROSSFADE}ms ease-in-out`;
+                s.style.opacity = "1";
+                if (prev) {
+                    prev.style.transition = `opacity ${CROSSFADE}ms ease-in-out`;
+                    prev.style.opacity = "0";
+                    setTimeout(() => prev.remove(), CROSSFADE);
+                }
+            });
+        } else if (prev) prev.remove();
+
+        // leyenda
+        caption.classList.add("swap");
+        setTimeout(() => {
+            document.getElementById("capK").textContent = f.k;
+            document.getElementById("capT").textContent = f.t;
+            caption.classList.remove("swap");
+        }, primera ? 0 : CROSSFADE * 0.45);
+
+        // indicadores
+        [...dots.children].forEach((d, i) => {
+            d.className = i < n ? "done" : "";
+            d.style.removeProperty("--dur");
+        });
+        void dots.offsetWidth;
+        const d = dots.children[n];
+        d.style.setProperty("--dur", DURACION + "ms");
+        d.classList.add("on");
+
+        actual = n;
+        clearTimeout(timer);
+        timer = setTimeout(() => mostrar((n + 1) % FOTOS.length), DURACION);
+    }
+    // arranca cuando carga la primera foto (evita parpadeo)
+    const p = new Image();
+    p.onload = p.onerror = () => mostrar(0, true);
+    p.src = FOTOS[0].src;
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) clearTimeout(timer);
+        else if (actual >= 0) timer = setTimeout(() => mostrar((actual + 1) % FOTOS.length), 800);
+    });
+
+    /* ════════ Mostrar / ocultar contraseña ════════ */
+    const clave = document.getElementById("clave");
+    document.getElementById("ojo").onclick = () => { clave.type = clave.type === "password" ? "text" : "password"; };
+
+    /* ════════ Inicio de sesión ════════ */
+    const form = document.getElementById("form");
+    const err = document.getElementById("error");
+    const btn = document.getElementById("btn");
+    function falla(msg) {
+        err.textContent = msg;
+        err.classList.remove("on"); void err.offsetWidth; err.classList.add("on");
+        btn.disabled = false; btn.textContent = "Ingresar";
+    }
+
+    // Si ya hay sesión abierta, pasa directo
+    fetch("/api/me", { credentials: "same-origin" }).then(r => { if (r.ok) location.replace("inicio.html"); }).catch(() => {});
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        err.classList.remove("on");
+        const usuario = form.usuario.value.trim(), c = clave.value;
+        if (!usuario || !c) return falla("Escribe tu usuario y contraseña.");
+        btn.disabled = true; btn.textContent = "Verificando…";
+        try {
+            const r = await fetch("/api/login", {
+                method: "POST", credentials: "same-origin",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ usuario, clave: c, recordar: document.getElementById("recordar").checked }),
+            });
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) return falla(data.error || "No se pudo iniciar sesión.");
+            entrar(data);
+        } catch (_) {
+            falla("No hay conexión con el servidor. ¿Está encendido el backend?");
+        }
+    });
+
+    /* ════════ Animación de entrada al sistema ════════ */
+    function entrar(user) {
+        clearTimeout(timer);
+        const splash = document.getElementById("splash");
+        const cur = document.getElementById("curtain");
+        document.getElementById("hello").textContent = "Bienvenido/a, " + user.nombre;
+        splash.classList.add("on");
+        const ini = "polygon(0 0,0 0,-14% 100%,0 100%)", fin = "polygon(0 0,114% 0,100% 100%,0 100%)";
+        const dur = reduce ? 1 : 900;
+        cur.animate([{ clipPath: ini }, { clipPath: fin }], { duration: dur, easing: "cubic-bezier(.77,0,.18,1)", fill: "forwards" });
+        setTimeout(() => { location.href = "inicio.html"; }, reduce ? 400 : 3300);
+    }
+    </script>
+</body>
+</html>

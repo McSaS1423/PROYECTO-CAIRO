@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citas & Agenda · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+    <style>
+        .calendario-cupos{padding:.8rem;border:1px solid var(--cairo-line);border-radius:14px;background:var(--cairo-card)}
+        .calendario-cupos-cabecera{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+        .calendario-cupos-cabecera strong{text-transform:capitalize}
+        .calendario-cupos-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.25rem;text-align:center}
+        .calendario-cupos-dia{min-width:0;min-height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:0;border-radius:9px;background:transparent;color:var(--cairo-text);font-size:.82rem}
+        .calendario-cupos-dia:not(:disabled):hover{background:var(--cairo-soft)}
+        .calendario-cupos-dia.seleccionado{background:var(--cairo-primary);color:#fff;font-weight:700}
+        .calendario-cupos-dia.agotado,.calendario-cupos-dia:disabled{background:#eee9e1;color:#a49a8d;cursor:not-allowed}
+        .calendario-cupos-dia.agotado{background:#f8e6e3;color:#a84d42}
+        .calendario-cupos-numero{line-height:1.1}
+        .calendario-cupos-cuenta{font-size:.55rem;line-height:1.1;color:var(--cairo-muted);white-space:nowrap}
+        .calendario-cupos-dia.agotado .calendario-cupos-cuenta{color:inherit;font-weight:700}
+        .calendario-cupos-dia.seleccionado .calendario-cupos-cuenta{color:#fff}
+        .calendario-cupos-dia.pasado{opacity:.55}
+        .calendario-cupos-dia.verificando{opacity:.65}
+        .calendario-cupos-semana{color:var(--cairo-muted);font-size:.68rem;font-weight:700}
+        .calendario-cupos-estado{display:block;min-height:1.4rem;margin-top:.5rem;color:var(--cairo-muted);font-size:.78rem}
+        .calendario-cupos-leyenda{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.5rem;color:var(--cairo-muted);font-size:.72rem}
+        .calendario-cupos-leyenda span{display:inline-flex;align-items:center;gap:.3rem}
+        .calendario-cupos-muestra{width:12px;height:12px;border-radius:4px;background:var(--cairo-soft)}
+        .calendario-cupos-muestra.no-disponible{background:#f8e6e3;border:1px solid #e8c2bd}
+        html[data-tema="oscuro"] .calendario-cupos-dia.agotado,
+        html[data-tema="oscuro"] .calendario-cupos-dia:disabled{background:#34373d;color:#817a70}
+        html[data-tema="oscuro"] .calendario-cupos-dia.agotado{background:#49302e;color:#e3a097}
+        html[data-tema="oscuro"] .calendario-cupos-muestra.no-disponible{background:#49302e;border-color:#80534d}
+    </style>
+</head>
+<body data-active="citas" data-title="Citas & Agenda" data-crumb="Citas & Agenda">
+
+    <template id="acciones"><button class="btn btn-soft" id="btnExcel">Exportar Excel</button></template>
+    <main id="contenido">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="cairo-card p-4">
+                    <h5 class="fw-bold mb-3">Nueva cita</h5>
+                    <form id="form">
+                        <div class="mb-3"><label class="form-label">Paciente</label><select id="paciente" class="form-select"></select></div>
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <span class="form-label d-block">Fecha</span>
+                                <input id="fecha" type="hidden">
+                                <div class="calendario-cupos" aria-label="Calendario de disponibilidad">
+                                    <div class="calendario-cupos-cabecera">
+                                        <button class="btn-icon" id="mesAnterior" type="button" aria-label="Mes anterior">‹</button>
+                                        <strong id="mesVisible" aria-live="polite"></strong>
+                                        <button class="btn-icon" id="mesSiguiente" type="button" aria-label="Mes siguiente">›</button>
+                                    </div>
+                                    <div class="calendario-cupos-grid calendario-cupos-semana" aria-hidden="true">
+                                        <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span><span>Do</span>
+                                    </div>
+                                    <div class="calendario-cupos-grid" id="diasCalendario" role="group" aria-label="Días disponibles"></div>
+                                    <div class="calendario-cupos-leyenda" aria-label="Leyenda del calendario">
+                                        <span><i class="calendario-cupos-muestra"></i>Disponible</span>
+                                        <span><i class="calendario-cupos-muestra no-disponible"></i>No disponible · cupo agotado</span>
+                                    </div>
+                                    <small class="calendario-cupos-estado" id="estadoCupos" role="status" aria-live="polite">Cargando disponibilidad…</small>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-3"><label class="form-label">Hora</label><input id="hora" type="time" class="form-control" value="09:00"></div>
+                        </div>
+                        <div class="mb-3"><label class="form-label">Procedimiento</label><input id="proc" class="form-control" placeholder="Ej: Control de vacunas"></div>
+                        <div class="mb-3"><label class="form-label">Observaciones</label><textarea id="observaciones" class="form-control" rows="2"></textarea></div>
+                        <button class="btn cairo-btn w-100" type="submit">Agendar</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="cairo-card p-4"><h5 class="fw-bold mb-3">Próximas citas</h5><div id="lista"></div></div>
+            </div>
+        </div>
+    </main>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/avatar.js"></script>
+    <script>
+
+        const $ = (i) => document.getElementById(i);
+        let citas = [];
+        let mesCalendario = new Date();
+        let disponibilidad = { capacidad_diaria: 20, citas_por_fecha: [] };
+        let disponibilidadCargada = false;
+        let solicitudCalendario = 0;
+        const fechaISO = (fecha) => `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(fecha.getDate()).padStart(2, "0")}`;
+        const mesISO = (fecha) => `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`;
+        const fechaLegible = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString("es", {
+            weekday: "long", day: "numeric", month: "long", year: "numeric",
+        });
+        async function cargarDisponibilidad() {
+            const solicitud = ++solicitudCalendario;
+            $("mesVisible").textContent = mesCalendario.toLocaleDateString("es", { month: "long", year: "numeric" });
+            disponibilidadCargada = false;
+            $("fecha").value = "";
+            $("estadoCupos").textContent = "Cargando disponibilidad…";
+            dibujarCalendario();
+            try {
+                const mes = mesISO(mesCalendario);
+                const data = await Cairo.api(`/citas/disponibilidad?mes=${encodeURIComponent(mes)}`);
+                if (solicitud !== solicitudCalendario) return;
+                disponibilidad = data;
+                disponibilidadCargada = true;
+                dibujarCalendario();
+            } catch (error) {
+                if (solicitud === solicitudCalendario) {
+                    dibujarCalendario();
+                    const detalle = error.message === "No encontrado"
+                        ? "El servidor de Cairo está desactualizado. Cierra su ventana o terminal y vuelve a iniciar Sistema Cairo.bat."
+                        : error.message;
+                    $("estadoCupos").textContent = location.protocol === "file:"
+                        ? `Cairo debe abrirse desde el servidor, no desde un archivo file://. Inicia Sistema Cairo.bat y abre http://127.0.0.1:5000/citas.html. ${detalle}`
+                        : `No se pudo consultar la disponibilidad: ${detalle}`;
+                }
+            }
+        }
+        function dibujarCalendario() {
+            const primerDia = new Date(mesCalendario.getFullYear(), mesCalendario.getMonth(), 1);
+            const diasMes = new Date(mesCalendario.getFullYear(), mesCalendario.getMonth() + 1, 0).getDate();
+            const espacios = (primerDia.getDay() + 6) % 7;
+            const ocupacion = new Map(disponibilidad.citas_por_fecha.map((cita) => [cita.fecha, cita.cantidad]));
+            const hoy = fechaISO(new Date());
+            const fragmento = document.createDocumentFragment();
+            for (let i = 0; i < espacios; i++) {
+                const espacio = document.createElement("span");
+                espacio.setAttribute("aria-hidden", "true");
+                fragmento.appendChild(espacio);
+            }
+            for (let dia = 1; dia <= diasMes; dia++) {
+                const fecha = new Date(mesCalendario.getFullYear(), mesCalendario.getMonth(), dia);
+                const iso = fechaISO(fecha);
+                const cantidad = Number(ocupacion.get(iso) || 0);
+                const agotado = disponibilidadCargada && cantidad >= disponibilidad.capacidad_diaria;
+                const pasado = iso < hoy;
+                const verificando = !disponibilidadCargada && !pasado;
+                const boton = document.createElement("button");
+                boton.type = "button";
+                const disponible = disponibilidadCargada && !agotado && !pasado;
+                boton.className = `calendario-cupos-dia${agotado ? " agotado" : ""}${disponible ? " disponible" : ""}${pasado ? " pasado" : ""}${verificando ? " verificando" : ""}${$("fecha").value === iso ? " seleccionado" : ""}`;
+                const numero = document.createElement("span");
+                numero.className = "calendario-cupos-numero";
+                numero.textContent = String(dia);
+                boton.appendChild(numero);
+                if (disponibilidadCargada && !pasado) {
+                    const cuenta = document.createElement("span");
+                    cuenta.className = "calendario-cupos-cuenta";
+                    cuenta.textContent = `${cantidad}/${disponibilidad.capacidad_diaria}`;
+                    boton.appendChild(cuenta);
+                }
+                boton.disabled = agotado || pasado || verificando;
+                boton.title = agotado
+                    ? `${fechaLegible(iso)}: No disponible, cupo agotado (${cantidad}/${disponibilidad.capacidad_diaria})`
+                    : pasado
+                        ? `${fechaLegible(iso)}: No disponible, fecha pasada`
+                        : verificando
+                            ? `${fechaLegible(iso)}: verificando disponibilidad`
+                            : `${fechaLegible(iso)}: ${disponibilidad.capacidad_diaria - cantidad} cupos disponibles de ${disponibilidad.capacidad_diaria}`;
+                boton.setAttribute("aria-label", boton.title);
+                boton.setAttribute("aria-pressed", String($("fecha").value === iso));
+                boton.addEventListener("click", () => {
+                    $("fecha").value = iso;
+                    $("estadoCupos").textContent =
+                        `${fechaLegible(iso)} · Disponible, ${disponibilidad.capacidad_diaria - cantidad} cupos restantes.`;
+                    dibujarCalendario();
+                });
+                fragmento.appendChild(boton);
+            }
+            $("diasCalendario").replaceChildren(fragmento);
+            const seleccion = $("fecha").value;
+            if (seleccion) {
+                const cantidadSeleccionada = Number(ocupacion.get(seleccion) || 0);
+                if (seleccion < hoy || (disponibilidadCargada && cantidadSeleccionada >= disponibilidad.capacidad_diaria)) {
+                    $("fecha").value = "";
+                }
+            }
+            const fechaSeleccionada = $("fecha").value;
+            if (fechaSeleccionada && mesISO(new Date(`${fechaSeleccionada}T00:00:00`)) === mesISO(mesCalendario)) {
+                const cantidad = Number(ocupacion.get(fechaSeleccionada) || 0);
+                $("estadoCupos").textContent = cantidad >= disponibilidad.capacidad_diaria
+                    ? `${fechaLegible(fechaSeleccionada)}: cupo agotado. Selecciona otra fecha.`
+                    : `${fechaLegible(fechaSeleccionada)} · ${disponibilidad.capacidad_diaria - cantidad} cupos disponibles.`;
+            } else if (!disponibilidadCargada) {
+                $("estadoCupos").textContent = "Consultando disponibilidad…";
+            } else {
+                $("estadoCupos").textContent = `Límite diario: ${disponibilidad.capacidad_diaria} citas. Los días agotados están deshabilitados.`;
+            }
+        }
+        async function cargar() {
+            citas = await Cairo.api(`/citas?desde=${encodeURIComponent(fechaISO(new Date()))}`);
+            $("lista").innerHTML = citas.length ? citas.map(c => `
+                <div class="cita">
+                    <div class="dia">${+c.fecha.slice(8)}</div>
+                    <div class="cita-paciente-foto">${c.foto_url
+                        ? `<img data-cita-foto="${Number(c.id)}" src="${Cairo.esc(c.foto_url)}" alt="Foto de ${Cairo.esc(c.paciente)}">`
+                        : c.avatar_data
+                            ? CairoAvatar.svg(c.avatar_data, c.especie || "Gato")
+                            : `<span>${Cairo.esc((c.paciente || "?")[0].toUpperCase())}</span>`}</div>
+                    <div class="flex-grow-1">
+                        <div><b>${Cairo.esc(c.paciente)}</b> <small>(Tutor: ${Cairo.esc(c.propietario || "—")}${c.telefono ? " · " + Cairo.esc(c.telefono) : ""})</small></div>
+                        <small><b>Procedimiento:</b> ${Cairo.esc(c.procedimiento)}</small>
+                        ${c.observaciones ? `<div><small><b>Observaciones:</b> ${Cairo.esc(c.observaciones)}</small></div>` : ""}
+                    </div>
+                    <span class="pill">${Cairo.fmt.fecha(c.fecha)} · ${Cairo.fmt.hora(c.hora)}</span>
+                    <button class="btn-icon peligro" title="Cancelar cita" data-del="${c.id}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12ZM19 4h-3.500l-1-1h-5l-1 1H5v2h14V4Z"/></svg></button>
+                </div>`).join("") : '<div class="vacio">No hay citas programadas.</div>';
+            $("lista").querySelectorAll("[data-cita-foto]").forEach((image) => {
+                image.addEventListener("error", () => {
+                    const appointment = citas.find((item) => String(item.id) === image.dataset.citaFoto);
+                    image.parentElement.innerHTML = appointment?.avatar_data
+                        ? CairoAvatar.svg(appointment.avatar_data, appointment.especie || "Gato")
+                        : `<span>${Cairo.esc((appointment?.paciente || "?")[0].toUpperCase())}</span>`;
+                }, { once: true });
+            });
+        }
+        $("lista").addEventListener("click", async (e) => {
+            const b = e.target.closest("[data-del]"); if (!b || !confirm("¿Cancelar esta cita?")) return;
+            await Cairo.api("/citas/" + b.dataset.del, { method: "DELETE" }); Cairo.toast("Cita cancelada"); cargar();
+        });
+        $("form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!disponibilidadCargada || !$("fecha").value) {
+                Cairo.toast(disponibilidadCargada
+                    ? "Selecciona una fecha disponible."
+                    : "No se pudo consultar la disponibilidad. Intenta de nuevo.", "error");
+                return;
+            }
+            try {
+                await Cairo.api("/citas", { method: "POST", body: { paciente_id: $("paciente").value, fecha: $("fecha").value, hora: $("hora").value, procedimiento: $("proc").value, observaciones: $("observaciones").value } });
+                Cairo.toast("Cita agendada"); $("proc").value = ""; $("observaciones").value = ""; cargar(); cargarDisponibilidad();
+            } catch (err) {
+                Cairo.toast(err.message, "error");
+                if (err.message.includes("Límite de citas")) cargarDisponibilidad();
+            }
+        });
+        Cairo.ready.then(async () => {
+            const hoy = new Date();
+            mesCalendario = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            $("mesAnterior").addEventListener("click", () => {
+                mesCalendario.setMonth(mesCalendario.getMonth() - 1);
+                $("fecha").value = "";
+                cargarDisponibilidad();
+            });
+            $("mesSiguiente").addEventListener("click", () => {
+                mesCalendario.setMonth(mesCalendario.getMonth() + 1);
+                $("fecha").value = "";
+                cargarDisponibilidad();
+            });
+            $("btnExcel").onclick = () => Cairo.exportExcel("citas_cairo.xls",
+                ["Fecha", "Hora", "Paciente", "Propietario", "Teléfono", "Procedimiento", "Observaciones", "Estado"],
+                citas.map(c => [c.fecha, c.hora, c.paciente, c.propietario, c.telefono, c.procedimiento, c.observaciones, c.estado]));
+            const ps = await Cairo.api("/pacientes");
+            $("paciente").innerHTML = ps.length ? ps.map(p => `<option value="${p.id}">${Cairo.esc(p.nombre)} (${p.codigo})</option>`).join("") : "<option value=''>Primero registra un paciente</option>";
+            cargar().catch(e => Cairo.toast(e.message, "error"));
+            cargarDisponibilidad();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" class="cargando">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulos clínicos · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+</head>
+<body>
+    <template id="acciones">
+        <button class="btn btn-soft" id="btnExcel">Exportar Excel</button>
+        <button class="btn cairo-btn" id="btnNuevo">＋ Nuevo registro</button>
+    </template>
+    <main id="contenido">
+        <section id="vistaListado">
+            <div class="modulo-brand">
+                <span class="modulo-brand-icon" id="moduloIcono" aria-hidden="true"></span>
+                <div><strong id="moduloMarca">Proyecto CAIRO</strong><small>Clínica &amp; Refugio · Gestión clínica</small></div>
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-9" id="colBuscar">
+                    <label class="visually-hidden" for="q">Buscar registros</label>
+                    <input id="q" type="search" class="form-control" placeholder="Buscar registros…">
+                </div>
+                <div class="col-md-3 d-none" id="filtroServicioWrap">
+                    <label class="visually-hidden" for="filtroServicio">Filtrar por tipo de servicio</label>
+                    <select id="filtroServicio" class="form-select">
+                        <option value="">Todos los servicios</option>
+                        <option>Consulta General</option>
+                        <option>Consulta</option>
+                        <option>Vacunación</option>
+                        <option>Desparasitación</option>
+                        <option>Esterilización</option>
+                        <option>Castración</option>
+                        <option>Otro</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-none" id="filtroEspecieWrap">
+                    <label class="visually-hidden" for="filtroEspecie">Filtrar por especie</label>
+                    <select id="filtroEspecie" class="form-select">
+                        <option value="">Todas las especies</option>
+                        <option>Gato</option>
+                        <option>Perro</option>
+                        <option>Otro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="cairo-card p-3 p-md-4">
+                <div class="table-responsive">
+                    <table class="table tabla mb-0">
+                        <thead id="thead"></thead>
+                        <tbody id="tbody"><tr><td class="vacio">Cargando…</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    <div class="modal fade" id="editor" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content cairo-card">
+                <form id="formEditor">
+                    <div class="modal-header border-0">
+                        <h2 class="modal-title fs-5 fuente-titulo" id="tituloEditor">Nuevo registro</h2>
+                        <button type="button" class="btn-close" id="btnCerrarEditor" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body"><div class="row g-3" id="campos"></div></div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-soft" id="btnCancelarEditor" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn cairo-btn" id="btnGuardar">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </main>
+    <div class="modal fade" id="historiaPacienteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content cairo-card">
+                <form id="formHistoriaPaciente">
+                    <div class="modal-header border-0">
+                        <h2 class="modal-title fs-5 fuente-titulo">Registrar historia médica</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label" for="pacienteHistoria">Selecciona el paciente</label>
+                        <select class="form-select" id="pacienteHistoria" required>
+                            <option value="">Cargando pacientes…</option>
+                        </select>
+                        <a id="linkRegistrarPaciente" href="formulario_paciente.html" class="btn cairo-btn mt-3" hidden>＋ Registrar paciente</a>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn cairo-btn" id="btnAbrirHistoria">Ver historia</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/avatar.js"></script>
+    <script src="js/modulos.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compartir acceso · Proyecto CAIRO</title>
+    <link rel="icon" type="image/png" href="img/favicon.png?v=2">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/cairo.css">
+    <style>
+        body{min-height:100vh;background:linear-gradient(135deg,#fff8eb,#f7efe0)}
+        .compartir-shell{min-height:100vh;display:grid;place-items:center;padding:2rem 1rem}
+        .compartir-card{width:min(100%,560px);padding:clamp(1.5rem,5vw,3rem);text-align:center}
+        .compartir-logo{position:relative;width:88px;height:88px;margin:0 auto;overflow:hidden;border:4px solid #0d6b8e;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.72),0 8px 18px rgba(14,92,132,.2)}
+        .compartir-logo img{position:absolute;width:304%;max-width:none;height:auto;left:-102%;top:-77%;display:block}
+        .compartir-card h1{font-family:var(--font-title);font-weight:700;margin:1rem 0 .4rem}
+        .compartir-intro{color:var(--cairo-muted);margin-bottom:1.7rem}
+        .share-field{display:flex;gap:.5rem}
+        .share-field input{min-width:0}
+        .share-status{display:block;min-height:1.4rem;margin-top:.6rem;color:var(--cairo-muted);font-size:.84rem}
+        .qr-wrap{width:240px;height:240px;display:grid;place-items:center;margin:1.5rem auto .7rem;padding:12px;border:1px solid var(--cairo-line);border-radius:20px;background:#fff}
+        .qr-wrap img{width:100%;height:100%;object-fit:contain}
+        .qr-placeholder{color:var(--cairo-muted);font-size:.9rem}
+        .share-actions{display:flex;justify-content:center;gap:.7rem;flex-wrap:wrap;margin-top:1.5rem}
+        @media(max-width:420px){.share-field{flex-direction:column}.share-field button{width:100%}}
+    </style>
+</head>
+<body>
+    <main class="compartir-shell">
+        <section class="cairo-card compartir-card" aria-labelledby="titulo">
+            <div class="compartir-logo"><img src="img/logo-cairo-login.png" alt="Logo original de CAIRO"></div>
+            <h1 id="titulo">Compartir acceso</h1>
+            <p class="compartir-intro">Comparte este enlace o escanea el código QR desde un dispositivo conectado a la misma red.</p>
+            <label class="form-label d-block text-start" for="shareUrl">Enlace para compartir en esta red</label>
+            <div class="share-field">
+                <input class="form-control" id="shareUrl" type="text" readonly value="Detectando dirección…" aria-describedby="shareStatus">
+                <button class="btn cairo-btn" id="copyShareUrl" type="button" disabled>Copiar enlace</button>
+            </div>
+            <small class="share-status" id="shareStatus" role="status" aria-live="polite"></small>
+            <div class="qr-wrap" id="qrWrap" aria-label="Código QR del enlace de acceso">
+                <span class="qr-placeholder" id="qrPlaceholder">Generando código QR…</span>
+                <img id="shareQr" alt="Código QR para abrir Cairo desde otro dispositivo" hidden>
+            </div>
+            <p class="text-muted small mb-0">El acceso funciona mientras ambos dispositivos estén conectados a la misma red.</p>
+            <div class="share-actions">
+                <a class="btn btn-soft" href="login.html">Volver al login</a>
+            </div>
+        </section>
+    </main>
+    <script>
+        const shareUrl = document.getElementById("shareUrl");
+        const copyShareUrl = document.getElementById("copyShareUrl");
+        const shareStatus = document.getElementById("shareStatus");
+        const shareQr = document.getElementById("shareQr");
+        const qrPlaceholder = document.getElementById("qrPlaceholder");
+
+        async function actualizarEnlaceCompartido() {
+            try {
+                const response = await fetch("/api/network-address", { cache: "no-store" });
+                if (!response.ok) throw new Error("No se pudo consultar la dirección de red.");
+                const data = await response.json();
+                if (!data.url) {
+                    shareUrl.value = "No se detectó una IPv4 de red local";
+                    copyShareUrl.disabled = true;
+                    shareStatus.textContent = "Conecta esta computadora a una red Wi-Fi o local e intenta de nuevo.";
+                    shareQr.hidden = true;
+                    qrPlaceholder.hidden = false;
+                    qrPlaceholder.textContent = "No se pudo generar el código QR.";
+                    return;
+                }
+
+                shareUrl.value = data.url;
+                copyShareUrl.disabled = false;
+                shareStatus.textContent = "El otro dispositivo debe estar conectado a esta misma red.";
+                shareQr.src = "/api/network-qr?t=" + Date.now();
+                shareQr.onload = () => {
+                    shareQr.hidden = false;
+                    qrPlaceholder.hidden = true;
+                };
+                shareQr.onerror = () => {
+                    shareQr.hidden = true;
+                    qrPlaceholder.hidden = false;
+                    qrPlaceholder.textContent = "No se pudo generar el código QR.";
+                };
+            } catch (_) {
+                shareUrl.value = "No se pudo detectar la dirección";
+                copyShareUrl.disabled = true;
+                shareStatus.textContent = "Comprueba que Cairo esté conectado a una red local.";
+                shareQr.hidden = true;
+                qrPlaceholder.hidden = false;
+                qrPlaceholder.textContent = "No se pudo generar el código QR.";
+            }
+        }
+
+        actualizarEnlaceCompartido();
+        setInterval(actualizarEnlaceCompartido, 30000);
+
+        copyShareUrl.addEventListener("click", async () => {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(shareUrl.value);
+                } else {
+                    shareUrl.focus();
+                    shareUrl.select();
+                    if (!document.execCommand("copy")) throw new Error("El navegador no permitió copiar.");
+                    shareUrl.setSelectionRange(0, 0);
+                }
+                shareStatus.textContent = "Enlace copiado. Compártelo con quien esté en la misma red.";
+            } catch (_) {
+                shareStatus.textContent = "No se pudo copiar. Selecciona y copia el enlace manualmente.";
+                shareUrl.focus();
+                shareUrl.select();
+            }
+        });
+    </script>
+</body>
+</html>
